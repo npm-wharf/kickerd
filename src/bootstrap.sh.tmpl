@@ -1,0 +1,3 @@
+{% for set in sets %}{% if set.type=="number" %}export {{ set.env }}={{ set.value }}{% else %}export {{ set.env }}="{{ set.value }}"{% endif %}
+{% endfor %}
+{{ start }}

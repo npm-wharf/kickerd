@@ -1,0 +1,15 @@
+version: "3.3"
+services:
+  etcd:
+    image: appcelerator/etcd:3.1.9
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+  app:
+    build: .
+    ports:
+      - 8008:8008
+    volumes:
+      - type: bind
+        source: ./example/app
+        target: /src/app

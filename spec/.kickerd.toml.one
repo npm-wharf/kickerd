@@ -1,0 +1,13 @@
+name = "test-app-1"
+description = "test description 1"
+
+[environment]
+  TITLE = "{{site-title}}"
+  PORT = "{{site-port}}"
+  MOTD = "{{site-motd}}"
+  ORG = "{{site-org}}"
+
+[default]
+  TITLE = "Demo"
+  PORT = 8008
+  MOTD = "Ohhai, it's a thing"

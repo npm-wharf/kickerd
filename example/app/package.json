@@ -1,0 +1,11 @@
+{
+  "name": "http",
+  "version": "1.0.0",
+  "description": "a sample app",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.3"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "site-title": "Kickerd Powered App",
+  "site-port": 8008,
+  "site-motd": "This App Bootstrapped By Kickerd & Etcd"
+}

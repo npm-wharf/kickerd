@@ -1,0 +1,11 @@
+.idea
+.git
+node_modules
+.travis.yml
+Dockerfile
+CHANGELOG.md
+README.md
+spec/
+test/
+docker-compose.yml
+package-lock.json

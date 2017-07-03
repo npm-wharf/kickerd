@@ -1,0 +1,2 @@
+hosts=etcd:2379
+ssl=false

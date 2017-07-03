@@ -1,0 +1,50 @@
+{
+  "name": "kickerd",
+  "version": "1.0.0",
+  "description": "source configuration from various inputs and kick the service when they change",
+  "main": "./src/index.js",
+  "bin": "./bin/kickerd",
+  "scripts": {
+    "pretest": "standard",
+    "test": "node_modules/mocha/bin/mocha ./spec/*.spec.js",
+    "coverage": "nyc npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arobson/kickerd.git"
+  },
+  "keywords": [
+    "configuration",
+    "etcd"
+  ],
+  "author": "Alex Robson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arobson/kickerd/issues"
+  },
+  "homepage": "https://github.com/arobson/kickerd#readme",
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-as-promised": "^7.0.0",
+    "coveralls": "^2.13.1",
+    "mocha": "^3.4.2",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^11.0.3",
+    "sinon": "^2.3.6",
+    "sinon-chai": "^2.11.0",
+    "standard": "^10.0.2"
+  },
+  "dependencies": {
+    "node-etcd": "^5.1.0",
+    "nunjucks": "^3.0.1",
+    "read-pkg-up": "^2.0.0",
+    "shell-quote": "^1.6.1",
+    "toml-j0.4": "^1.0.10",
+    "yargs": "^8.0.2"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ]
+  }
+}

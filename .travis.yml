@@ -12,6 +12,7 @@ before_script:
   - docker pull appcelerator/etcd:3.1.9
   - ./start-etcd.sh
   - docker ps
+  - sleep 15
 
 script:
   - nyc npm test && nyc report --reporter=text-lcov | coveralls

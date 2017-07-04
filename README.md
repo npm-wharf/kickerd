@@ -5,7 +5,7 @@ Source configuration from various inputs and kick the service when they change. 
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coveralls-image]][coveralls-url]
 
-## Problem
+## Problem It Solves
 
 Any sufficiently mature system I've worked on runs into a situation where the desire to supply service configuration from multiple sources comes into play. The primary issue is that they are generally:
 
@@ -21,7 +21,7 @@ Any sufficiently mature system I've worked on runs into a situation where the de
 
  For my use case, the first 3 generate a lot of additional work. I built a work around for the first, but the other two require me to maintain a separate fork of something that's not an ideal fit to begin with.
 
-## What Will Do
+## What It Will Do
 
 kickerd is an attempt to address this by providing a CLI/daemon that will:
 
@@ -30,7 +30,7 @@ kickerd is an attempt to address this by providing a CLI/daemon that will:
  * restart that process when a configuration value changes
  * log _warnings_ if no key, environment variable or default exists rather than error and fail to host the process
 
-## What Won't Do
+## What It Won't Do
 
 This does not provide a full fledged, open ended, choose your own adventure style template language. The TOML input this works with is very simple (as you'll see) and right now the only data back-end it even works with is etcd.
 

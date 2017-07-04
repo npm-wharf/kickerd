@@ -9,15 +9,15 @@ os:
   - linux
 
 before_script:
-  - docker pull alpine:3.4
-  - ./start-registry.sh
+  - docker pull appcelerator/etcd:3.1.9
+  - ./start-etcd.sh
 
 script:
   - nyc npm test && nyc report --reporter=text-lcov | coveralls
 
 after_script:
-  - ./kill-registry.sh
+  - ./kill-etcd.sh
 
 node_js:
-  - "4"
   - "6"
+  - "8"

@@ -2,7 +2,6 @@ const Etcd = require('node-etcd')
 const DEFAULT_URL = 'http://localhost:2379'
 
 function fetchConfig (client, config) {
-  console.log('using', config.prefix)
   return new Promise((resolve, reject) => {
     client.get(config.prefix, (err, response) => {
       if (err) {

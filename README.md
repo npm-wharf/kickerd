@@ -2,6 +2,9 @@
 
 Source configuration from various inputs and kick the service when they change. Heavily inspired by confd.
 
+[![Build Status][travis-image]][travis-url]
+[![Coverage Status][coveralls-image]][coveralls-url]
+
 ## Problem
 
 Any sufficiently mature system I've worked on runs into a situation where the desire to supply service configuration from multiple sources comes into play. The primary issue is that they are generally:
@@ -93,3 +96,7 @@ Argument list:
 
  * get the daemon/host command to work that reloads the process on configuration change
 
+[travis-url]: https://travis-ci.org/arobson/kickerd
+[travis-image]: https://travis-ci.org/arobson/kickerd.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/arobson/kickerd?branch=master
+[coveralls-image]: https://coveralls.io/repos/github/arobson/kickerd/badge.svg?branch=master

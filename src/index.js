@@ -3,10 +3,20 @@ const bootStrap = require('./bootstrap-template')
 const configMapper = require('./config-mapper')
 const etcdFn = require('./etcd')
 const processHost = require('./process-host')
+const RETRY_TIMEOUT = 5
 
-function configurationChanged (configuration, change) {
+function configurationChanged (configuration, etcd, change) {
   console.log(`Configuration change detected ${change.node.key}`)
-  processHost.restart(configuration, onExit)
+  if (configuration.lockRestart) {
+    const lock = etcd.lockRestart(configuration)
+    lock.lock()
+      .then(
+        () => onLock(configuration, lock),
+        onLockFailed.bind(null, configuration, etcd, change)
+      )
+  } else {
+    processHost.restart(configuration, onExit)
+  }
 }
 
 function onError (configuration, error) {
@@ -14,10 +24,23 @@ function onError (configuration, error) {
   process.exit(100)
 }
 
+function onLock (configuration, lock) {
+  return process.host.restart(configuration, onExit)
+    .then(
+      () => lock.unlock()
+    )
+}
+
+function onLockFailed (configuration, etcd, change, err) {
+  const retry = configuration.lockTTL || RETRY_TIMEOUT
+  console.log(`Failed to acquire lock, trying again in ${retry} seconds : ${err}`)
+  setTimeout(() => configurationChanged(configuration, etcd, change), retry)
+}
+
 function hostProcess (configuration, etcd) {
   processHost.start(configuration, onExit)
   etcd.watch(configuration, (change) => {
-    configurationChanged(configuration, change)
+    configurationChanged(configuration, etcd, change)
   })
 }
 

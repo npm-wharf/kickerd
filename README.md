@@ -28,6 +28,7 @@ kickerd is an attempt to address this by providing a CLI/daemon that will:
  * manage a set of configuration inputs
  * bootstrap a single process with the resulting configuration
  * restart that process when a configuration value changes
+ * establish a lock in etcd when restarting to limit restarts across instances
  * log _warnings_ if no key, environment variable or default exists rather than error and fail to host the process
 
 ## What It Doesn't Do
@@ -37,13 +38,14 @@ This does not provide a full fledged, open ended, choose your own adventure styl
 ## Goals
 
  * works well in/with containers
- * service source code doesn't require a change to work with kickerd
+ * works for multi-environment, multi-instance solutions
+ * hosted services shouldn't require code changes to work with kickerd
 
 ## Configuration Template
 
 There are three top level properties:
 
- * `name` - (optional) the title of the process, will use the package.json `name` if omitted
+ * `name`|`app` - (optional) the title of the process, will use the package.json `name` if omitted
  * `description` - (optional) the description, will use the package.json `description` if omitted
  * `start` - how to start the process, will attempt to use package.json `start` script if available
 
@@ -88,13 +90,96 @@ Argument list:
  * `--file` - default `.kicker.toml` - the configuration file to use
  * `--environment` - default `production` the environment prefix to use with the name to create etcd key prefix
  * `--prefix` - provide an explicit etcd key prefix for all keys
+ * `--lock-restart` - default `true` - limit instance restarts to one at a time using an etcd key for locking
+ * `--lock-ttl` - default `5` - seconds the restart lock will stay in etcd (prevents deadlocks)
  * `--debug` - print out environment values - DO NOT DO THIS IN PROD, IT WILL TELL YOUR SECRETS TO THE LOG
  * `--bootstrap` - instead of hosting the process, create a bootstrap shell script that exports the environment
  * `--etcd` - the URL to use for etcd, default is `http://localhost:2379`
 
+## Example with Docker Compose
+
+I've provided an example application that demonstrates how to use kickerd in a docker image to get configuration from an etcd cluster.
+
+__Starting The Example__
+```shell
+docker-compose build
+docker-compose up
+```
+
+Navigate to `http://localhost:8018`.
+
+__Clean up__
+```shell
+docker-compose down
+```
+
+The express app gets the process title, port and response content from etcd. Using whatever tool you're comfortable with, you can change any of the following keys and observe the changes:
+
+ * `http/development/site-title`
+ * `http/development/site-motd`
+ * `http/development/site-port`
+
+The goal of the example is to provide a simple working implementation that allows you to test ideas and also see what's involved in using it. The largest overhead is getting your own etcd cluster setup. 
+
+### containers
+
+ * etcd
+ * simple express app
+
+## How To Bake Kickerd Into Your Own Docker Images
+
+The docker image included in the example isn't super useful. There are three steps to using kickerd:
+ 
+ 1. a RUN step (or addition to an existing one) that installs kickerd as a global npm module
+ 1. creating a `.kicker.toml` file
+ 1. creating a start script for your docker image to call kickerd
+
+### 1 - Installing Kickerd In Your Docker Image
+
+Ideally, you'll do this for a _baseline_ image instead of doing it for your actual image. This keeps you from having to wait for a kickerd install every time you build your image during CI.
+
+```RUN npm i kickerd -g```
+
+### 2 - Creating a `.kicker.toml`
+
+This file provides the mapping from etcd keys to the environment variables your service uses. It can also provide overrides for the name, description, and how to start your service as well as defaults for environment variables that might be missing keys or won't have keys.
+
+This file should get picked up by the `ADD` directive in your service's `Dockerfile`, just be sure that if you have a `.dockerignore`, it doesn't have any directives that would exclude the file.
+
+### 3 - Creating a Start Script
+
+Last, you need a shell script that your Docker container will call in order to invoke kickerd and host your service.
+
+If you want your service to restart on key changes, then having kickerd host your service is the way to go. It will monitor the namespace for your keys for additions, changes and deletions and restart the service when they occur.
+
+By default, it will also orchestrate rolling restarts by locking on a special key in etcd so that all your instances don't restart at once on key changes.
+
+__To Have kickerd Host__
+```shell
+#!/bin/sh
+kickerd --etcd=http://etcd:2379
+```
+
+If this is a problem, you can always run kickerd in bootstrap mode. It will generate a shell script to start your service with the appropriate environment variables which you can then execute directly.
+
+This does not provide a way for configuration changes to signal your service to restart. The assumption here is that you don't actually want or need that behavior and would prefer to forgo the overhead.
+
+__To Generate A BootStrap Script__
+```shell
+#!/bin/sh
+kickerd --etcd=http://etcd:2379 --bootstrap=true
+./bootstrap.sh
+```
+
+## Running Tests
+
+You'll need a local running instance of etcd. The `start-etcd.sh` script will handle this for you if you're on a machine with docker running and don't require `sudo` to run the docker command.
+
 ## To Do
 
- * implement etcd locking on a key when restarting to prevent all instances restarting at once
+ * put bole logging in place around booting activity
+ * warn when no value was found for a key from etcd, environment or default
+ * provide security (SSL, auth) options for etcd
 
 [travis-url]: https://travis-ci.org/arobson/kickerd
 [travis-image]: https://travis-ci.org/arobson/kickerd.svg?branch=master

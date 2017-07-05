@@ -132,6 +132,26 @@ describe('Etcd', function () {
       })
     })
 
+    describe('when locking restarting', function () {
+      it('should create and store a new lock', function () {
+        const l1 = etcd.lockRestart(config)
+        config.lock.should.equal(l1)
+        etcd.lockRestart(config).should.equal(l1)
+        delete config.lock
+      })
+
+      it('should create and store a lock with custom TTL', function (done) {
+        config.lockTtl = 1
+        const l1 = etcd.lockRestart(config)
+        l1.lock().then(
+          () => {
+            return l1.unlock()
+          }
+        )
+        .then(() => done())
+      })
+    })
+
     after(function (done) {
       client.del(`${PREFIX}/`, { recursive: true }, () => done())
     })

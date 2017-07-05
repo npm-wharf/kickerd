@@ -1,4 +1,5 @@
-FROM npmjs/npm-docker-baseline:6.10
+# FROM npmjs/npm-docker-baseline:6.10
+from node:6.11-alpine
 
 RUN mkdir -p /src/kickerd && \
     mkdir -p /src/app

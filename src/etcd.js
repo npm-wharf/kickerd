@@ -1,5 +1,8 @@
 const Etcd = require('node-etcd')
+const Lock = require('etcd-lock')
 const DEFAULT_URL = 'http://localhost:2379'
+const LOCK_ID = 'kickerd'
+const LOCK_TTL = 5
 
 function applyChange (config, change) {
   let match = false
@@ -59,6 +62,14 @@ function getKey (prefix, fullKey) {
   return fullKey.split(prefix)[1].slice(1)
 }
 
+function lockRestart (client, config) {
+  if (!config.lock) {
+    const lock = new Lock(client, `${config.prefix}-lock`, LOCK_ID, config.lockTtl || LOCK_TTL)
+    config.lock = lock
+  }
+  return config.lock
+}
+
 function watch (client, config, onChange) {
   const watcher = client.watcher(config.prefix, null, {recursive: true})
   watcher.on('change', (change) => {
@@ -68,10 +79,11 @@ function watch (client, config, onChange) {
   config.watcher = watcher
 }
 
-module.exports = function (options = { url: DEFAULT_URL }, proxy) {
-  const client = proxy || new Etcd(options.url)
+module.exports = function (options = { url: DEFAULT_URL }) {
+  const client = new Etcd(options.url)
   return {
     fetchConfig: fetchConfig.bind(null, client),
+    lockRestart: lockRestart.bind(null, client),
     watch: watch.bind(null, client)
   }
 }

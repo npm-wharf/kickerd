@@ -35,7 +35,7 @@ describe('Process Host', function () {
       ]
     }
     processHost.start(configuration, () => { exited = true })
-    configuration.process.stdout.pipe(output)
+    // configuration.process.stdout.pipe(output)
     setTimeout(() => done(), 500)
   })
 

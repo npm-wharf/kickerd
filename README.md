@@ -35,6 +35,8 @@ kickerd is an attempt to address this by providing a CLI/daemon that will:
 
 This does not provide a full fledged, open ended, choose your own adventure style template language. The TOML input this works with is very simple (as you'll see) and right now the only data back-end it even works with is etcd.
 
+This is also not a process manager in the sense that it will keep your process running despite process crashes. **If the hosted process fails, kickerd will exit.** Something other than kickerd needs to ensure that your service survives crashes. Kickerd is not that.
+
 ## Goals
 
  * works well in/with containers
@@ -177,7 +179,6 @@ You'll need a local running instance of etcd. The `start-etcd.sh` script will ha
 
 ## To Do
 
- * put bole logging in place around booting activity
  * warn when no value was found for a key from etcd, environment or default
  * provide security (SSL, auth) options for etcd
 

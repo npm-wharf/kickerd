@@ -1,4 +1,5 @@
-
+const bole = require('bole')
+const log = bole('kickerd')
 const bootStrap = require('./bootstrap-template')
 const configMapper = require('./config-mapper')
 const etcdFn = require('./etcd')
@@ -6,9 +7,10 @@ const processHost = require('./process-host')
 const RETRY_TIMEOUT = 5
 
 function configurationChanged (configuration, etcd, change) {
-  console.log(`Configuration change detected ${change.node.key}`)
+  log.info(`Configuration change detected ${change.node.key}`)
   if (configuration.lockRestart) {
     const lock = etcd.lockRestart(configuration)
+    log.info('Acquiring restart lock')
     lock.lock()
       .then(
         () => onLock(configuration, lock),
@@ -20,11 +22,12 @@ function configurationChanged (configuration, etcd, change) {
 }
 
 function onError (configuration, error) {
-  console.log(`Error retrieving keys for ${configuration.prefix} from etcd ${configuration.etcd}: ${error.message}`)
+  log.error(`Error retrieving keys for ${configuration.prefix} from etcd ${configuration.etcd}: ${error.message}`)
   process.exit(100)
 }
 
 function onLock (configuration, lock) {
+  log.info('Restart lock acquired successfully')
   return process.host.restart(configuration, onExit)
     .then(
       () => lock.unlock()
@@ -33,11 +36,12 @@ function onLock (configuration, lock) {
 
 function onLockFailed (configuration, etcd, change, err) {
   const retry = configuration.lockTTL || RETRY_TIMEOUT
-  console.log(`Failed to acquire lock, trying again in ${retry} seconds : ${err}`)
+  log.error(`Failed to acquire lock, trying again in ${retry} seconds : ${err}`)
   setTimeout(() => configurationChanged(configuration, etcd, change), retry)
 }
 
 function hostProcess (configuration, etcd) {
+  log.info('Starting service')
   processHost.start(configuration, onExit)
   etcd.watch(configuration, (change) => {
     configurationChanged(configuration, etcd, change)
@@ -45,9 +49,7 @@ function hostProcess (configuration, etcd) {
 }
 
 function initProcess (configuration, etcd) {
-  if (configuration.debug === true) {
-    logConfiguration(configuration)
-  }
+  logConfiguration(configuration)
   if (configuration.bootstrap) {
     writeBootStrap(configuration)
   } else {
@@ -59,6 +61,7 @@ function kick (args) {
   const configuration = configMapper.load(args.file)
   Object.assign(configuration, args)
   const etcd = etcdFn({ url: configuration.etcd })
+  log.info('Fetching configuration from etcd')
   etcd.fetchConfig(configuration)
     .then(
       () => initProcess(configuration, etcd),
@@ -67,17 +70,18 @@ function kick (args) {
 }
 
 function logConfiguration (configuration) {
-  // lol, this needs improving
-  console.log(configuration)
+  log.debug('Configuration (application state)')
+  log.debug(configuration)
 }
 
 function onExit () {
+  log.info('Hosted service quit unexpectedly - exiting')
   process.exit(100)
 }
 
 function writeBootStrap (context) {
   bootStrap.generate(context)
-  console.log('bootstrap file generated successfully')
+  log.info('bootstrap file generated successfully')
 }
 
 module.exports = kick

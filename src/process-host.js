@@ -1,3 +1,5 @@
+const bole = require('bole')
+const log = bole('kickerd')
 const spawn = require('child_process').spawn
 const parse = require('shell-quote').parse
 const SIGTERM = 'SIGTERM'
@@ -24,7 +26,7 @@ function mapEnvironment (environment, configuration) {
 }
 
 function onError (error) {
-  console.log(`Failed to start service with error: ${error.message}`)
+  log.error(`Failed to start service with error: ${error.message}`)
   process.exit(100)
 }
 
@@ -41,6 +43,7 @@ function removeShutdownHandler () {
 }
 
 function restart (configuration, onExit) {
+  log.info('Restarting service to pick up new configuration values')
   return stop(configuration)
     .then(
       () => start(configuration, onExit)

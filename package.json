@@ -33,6 +33,7 @@
     "standard": "^10.0.2"
   },
   "dependencies": {
+    "bole": "^3.0.2",
     "etcd-lock": "^1.1.0",
     "node-etcd": "^5.1.0",
     "nunjucks": "^3.0.1",

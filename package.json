@@ -33,6 +33,7 @@
     "standard": "^10.0.2"
   },
   "dependencies": {
+    "etcd-lock": "^1.1.0",
     "node-etcd": "^5.1.0",
     "nunjucks": "^3.0.1",
     "read-pkg-up": "^2.0.0",

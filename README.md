@@ -21,7 +21,7 @@ Any sufficiently mature system I've worked on runs into a situation where the de
 
  For my use case, the first 3 generate a lot of additional work. I built a work around for the first, but the other two require me to maintain a separate fork of something that's not an ideal fit to begin with.
 
-## What It Will Do
+## What It Does
 
 kickerd is an attempt to address this by providing a CLI/daemon that will:
 
@@ -30,7 +30,7 @@ kickerd is an attempt to address this by providing a CLI/daemon that will:
  * restart that process when a configuration value changes
  * log _warnings_ if no key, environment variable or default exists rather than error and fail to host the process
 
-## What It Won't Do
+## What It Doesn't Do
 
 This does not provide a full fledged, open ended, choose your own adventure style template language. The TOML input this works with is very simple (as you'll see) and right now the only data back-end it even works with is etcd.
 
@@ -94,7 +94,7 @@ Argument list:
 
 ## To Do
 
- * get the daemon/host command to work that reloads the process on configuration change
+ * implement etcd locking on a key when restarting to prevent all instances restarting at once
 
 [travis-url]: https://travis-ci.org/arobson/kickerd
 [travis-image]: https://travis-ci.org/arobson/kickerd.svg?branch=master

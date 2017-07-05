@@ -2,39 +2,33 @@
 const bootStrap = require('./bootstrap-template')
 const configMapper = require('./config-mapper')
 const etcdFn = require('./etcd')
+const processHost = require('./process-host')
+
+function configurationChanged (configuration, change) {
+  console.log(`Configuration change detected ${change.node.key}`)
+  processHost.restart(configuration, onExit)
+}
 
 function onError (configuration, error) {
   console.log(`Error retrieving keys for ${configuration.prefix} from etcd ${configuration.etcd}: ${error.message}`)
   process.exit(100)
 }
 
-function onKeys (configuration, keys) {
-  configuration.sets.forEach(set => {
-    const etcdValue = keys[set.key]
-    if (etcdValue) {
-      if (!set.type) {
-        set.type = /['"A-Za-z:]/.test(etcdValue) ? 'string' : 'number'
-      }
-      set.value = etcdValue
-    }
+function hostProcess (configuration, etcd) {
+  processHost.start(configuration, onExit)
+  etcd.watch(configuration, (change) => {
+    configurationChanged(configuration, change)
   })
-  return configuration
 }
 
-// currently a noop, surprising no one
-function hostProcess (configuration) {
-  console.log('coming soon')
-  process.exit(100)
-}
-
-function initProcess (configuration) {
+function initProcess (configuration, etcd) {
   if (configuration.debug === true) {
     logConfiguration(configuration)
   }
   if (configuration.bootstrap) {
     writeBootStrap(configuration)
   } else {
-    hostProcess(configuration)
+    hostProcess(configuration, etcd)
   }
 }
 
@@ -44,15 +38,18 @@ function kick (args) {
   const etcd = etcdFn({ url: configuration.etcd })
   etcd.fetchConfig(configuration)
     .then(
-      keys => onKeys(configuration, keys),
+      () => initProcess(configuration, etcd),
       error => onError(configuration, error)
     )
-    .then(initProcess)
 }
 
 function logConfiguration (configuration) {
   // lol, this needs improving
   console.log(configuration)
+}
+
+function onExit () {
+  process.exit(100)
 }
 
 function writeBootStrap (context) {

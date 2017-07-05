@@ -22,7 +22,9 @@ describe('Process Host', function () {
   let configuration
   let output
   let exited = false
+  const START_TIMEOUT = process.env.TRAVIS ? 2000 : 500
   before(function (done) {
+    this.timeout(5000)
     output = new EchoStream()
     configuration = {
       cwd: './example/app',
@@ -36,7 +38,7 @@ describe('Process Host', function () {
     }
     processHost.start(configuration, () => { exited = true })
     configuration.process.stdout.pipe(process.stdout)
-    setTimeout(() => done(), 500)
+    setTimeout(() => done(), START_TIMEOUT)
   })
 
   it('should not exit unexpectedly', function () {
@@ -67,10 +69,11 @@ describe('Process Host', function () {
   })
 
   it('should restart on command', function (done) {
+    this.timeout(5000)
     configuration.sets[2].value = 'oh look, a new MOTD'
     processHost.restart(configuration, () => { exited = true })
       .then(() => {
-        setTimeout(() => done(), 500)
+        setTimeout(() => done(), START_TIMEOUT)
       })
   })
 

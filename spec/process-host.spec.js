@@ -22,6 +22,7 @@ describe('Process Host', function () {
   let configuration
   let output
   let exited = false
+  const TIMEOUT = process.env.TRAVIS ? 1000 : 500
   before(function (done) {
     output = new EchoStream()
     configuration = {
@@ -36,7 +37,7 @@ describe('Process Host', function () {
     }
     processHost.start(configuration, () => { exited = true })
     configuration.process.stdout.pipe(output)
-    setTimeout(() => done(), 500)
+    setTimeout(() => done(), TIMEOUT)
   })
 
   it('should not exit unexpectedly', function () {
@@ -70,7 +71,7 @@ describe('Process Host', function () {
     configuration.sets[2].value = 'oh look, a new MOTD'
     processHost.restart(configuration, () => { exited = true })
       .then(() => {
-        setTimeout(() => done(), 500)
+        setTimeout(() => done(), TIMEOUT)
       })
   })
 

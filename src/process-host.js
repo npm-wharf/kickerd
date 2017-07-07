@@ -14,6 +14,15 @@ function addSignalHandler (configuration) {
   }
 }
 
+function getArguments (configuration) {
+  return configuration.sets.reduce((args, set) => {
+    if (set.argument) {
+      args.push(`--${set.argument}=${set.value}`)
+    }
+    return args
+  }, [])
+}
+
 function mapEnvironment (environment, configuration) {
   configuration.sets.forEach(set => {
     let value = set.value || set.default
@@ -53,11 +62,12 @@ function restart (configuration, onExit) {
 function start (configuration, onExit) {
   addSignalHandler(configuration)
   const parts = parse(configuration.start)
+  const argList = getArguments(configuration)
   const environment = process.env
   mapEnvironment(environment, configuration)
   const child = spawn(
     parts[0],
-    parts.slice(1),
+    parts.slice(1).concat(argList),
     {
       cwd: configuration.cwd || process.cwd(),
       env: environment,

@@ -12,8 +12,9 @@ describe('Bootstrap Template', function () {
       start: 'node ./src',
       sets: [
         { env: 'VAL_ONE', value: 1, type: 'number' },
-        { env: 'VAL_TWO', value: 'two' },
-        { env: 'VAL_THREE', value: 'Hello, World' }
+        { env: 'VAL_TWO', value: 'two', argument: 'val-two' },
+        { env: 'VAL_THREE', value: 'Hello, World' },
+        { env: 'VAL_FOUR', value: true, type: 'boolean', argument: 'val-four' }
       ]
     }
 

@@ -57,6 +57,7 @@ Blocks:
 
  * environment - assign environment variables to etcd keys
  * default - defaults to fall back to when no environment variable exists
+ * argument - arguments to pass to the process when starting it
 
 __Example: configuration.toml__
 ```shell
@@ -73,11 +74,16 @@ start = "node ./index.js"
   TITLE = "Demo"
   PORT = 8008
   MOTD = "Ohhai, it's a thing"
+
+[argument]
+  title = "TITLE"
+  message-of-the-day = "MOTD"
 ```
 
  * When a key isn't available in the data source (etcd), then the environment variable's value will be used. 
  * If the environment variable is empty, then a default value (if one was provided) will be used.
  * If no default variable was provided, then a warning will be logged to stdout before starting the service.
+ * Arguments **must** map to environment variables
 
 ## CLI
 

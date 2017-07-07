@@ -32,7 +32,8 @@ describe('Process Host', function () {
         { env: 'TITLE', value: 'http' },
         { env: 'PORT', value: 8018 },
         { env: 'MOTD', value: 'this is a test of sorts' },
-        { env: 'DEBUG', value: 'express.*' }
+        { env: 'GREETING_ROUTE', value: '/custom-greeting', argument: 'greeting-route' },
+        { env: 'GREETING_MESSAGE', value: 'hey, look, it\'s a message', argument: 'greeting-message' }
       ]
     }
     processHost.start(configuration, () => { exited = true })
@@ -53,6 +54,7 @@ describe('Process Host', function () {
 
   it('should be serving requests', function (done) {
     http.request({
+      path: '/custom-greeting',
       port: 8018
     }, (res) => {
       let raw = []
@@ -60,7 +62,7 @@ describe('Process Host', function () {
         raw.push(chunk.toString())
       })
       res.on('end', () => {
-        raw.join('').should.eql('this is a test of sorts')
+        raw.join('').should.eql('{"greeting":"hey, look, it\'s a message"}')
         done()
       })
       res.statusCode.should.eql(200)

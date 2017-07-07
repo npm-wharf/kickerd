@@ -1,0 +1,20 @@
+name = "test-app-1"
+description = "test description 1"
+
+[environment]
+  TITLE = "{{site-title}}"
+  PORT = 8008
+  MOTD = "{{site-motd}}"
+  ORG = "Acme"
+
+[default]
+  TITLE = "Demo"
+  MOTD = "Ohhai, it's a thing"
+  RESTART = true
+
+[argument]
+  page-title = "TITLE"
+  host-port = "PORT"
+  message-of-the-day = "MOTD"
+  org-name = "ORG"
+  restart-on-fail = "RESTART"

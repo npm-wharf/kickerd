@@ -35,6 +35,7 @@
     "standard-version": "^4.2.0"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "bole": "^3.0.2",
     "etcd-lock": "^1.1.0",
     "node-etcd": "^5.1.0",

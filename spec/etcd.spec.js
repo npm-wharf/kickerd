@@ -3,7 +3,8 @@ require('./setup')
 const Etcd = require('node-etcd')
 const etcdFn = require('../src/etcd')
 const ETCD_URL = 'http://localhost:2379'
-const PREFIX = 'kickerd/development'
+const PREFIX = 'development'
+const NAME = 'kickerd'
 
 function set (client, key, value) {
   return new Promise(function (resolve, reject) {
@@ -29,14 +30,18 @@ describe('Etcd', function () {
   let keyList = [
     { key: 'a', value: '1' },
     { key: 'b', value: '2' },
-    { key: 'c', value: '3' }
+    { key: 'c', value: '3' },
+    { key: 'd', value: '4' },
+    { key: `${NAME}/d`, value: '5' }
   ]
   let config = {
     prefix: PREFIX,
+    name: NAME,
     sets: [
       { key: 'a' },
       { key: 'b' },
-      { key: 'c' }
+      { key: 'c' },
+      { key: 'd' }
     ]
   }
   describe('when fetching initial keys', function () {
@@ -47,14 +52,15 @@ describe('Etcd', function () {
 
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
-        .should.eventually.eql({ a: '1', b: '2', c: '3' })
+        .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5' })
     })
 
     it('should apply keys to configuration', function () {
       return config.sets.should.eql([
         { key: 'a', value: '1', type: 'number' },
         { key: 'b', value: '2', type: 'number' },
-        { key: 'c', value: '3', type: 'number' }
+        { key: 'c', value: '3', type: 'number' },
+        { key: 'd', value: '5', type: 'number' }
       ])
     })
 
@@ -75,7 +81,8 @@ describe('Etcd', function () {
         config.sets.should.eql([
           { key: 'a', value: '1.1', type: 'number' },
           { key: 'b', value: '2', type: 'number' },
-          { key: 'c', value: '3', type: 'number' }
+          { key: 'c', value: '3', type: 'number' },
+          { key: 'd', value: '5', type: 'number' }
         ])
       })
 

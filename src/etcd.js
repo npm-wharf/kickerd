@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
 const DEFAULT_URL = 'http://localhost:2379'
@@ -41,20 +42,32 @@ function applyKeys (config, keys) {
 }
 
 function fetchConfig (client, config) {
-  return new Promise((resolve, reject) => {
-    client.get(config.prefix, (err, response) => {
-      if (err) {
-        reject(err)
-      } else {
-        const hash = response.node.nodes.reduce((acc, node) => {
-          const key = getKey(config.prefix, node.key)
-          acc[key] = node.value
-          return acc
-        }, {})
-        applyKeys(config, hash)
-        resolve(hash)
+  const get = Promise.promisify(client.get, {context: client})
+  return Promise.join(
+    get(`${config.prefix}/${config.name}`),
+    get(config.prefix)
+  ).spread((serviceConfig, globalConfig) => {
+    serviceConfig = serviceConfig.node.nodes.reduce((acc, node) => {
+      const key = getKey(`${config.prefix}/${config.name}`, node.key)
+      acc[key] = node.value
+      return acc
+    }, {})
+    // merge service specific config and config in
+    // top-level key.
+    return globalConfig.node.nodes.reduce((acc, node) => {
+      if (node.dir) return acc
+      const key = getKey(config.prefix, node.key)
+      if (serviceConfig[key]) {
+        acc[key] = serviceConfig[key]
+        return acc
       }
-    })
+      acc[key] = node.value
+      return acc
+    }, {})
+  })
+  .then((hash) => {
+    applyKeys(config, hash)
+    return hash
   })
 }
 

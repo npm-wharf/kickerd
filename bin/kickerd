@@ -6,7 +6,7 @@ const readPkgUp = require('read-pkg-up')
 const pkg = readPkgUp.sync()
 const nameParts = pkg.pkg.name.split('/')
 const name = nameParts.length > 1 ? nameParts[ 1 ] : nameParts[ 0 ]
-const DEFAULT_PREFIX = `${name}/production`
+const DEFAULT_PREFIX = 'production'
 
 const args = require('yargs') // eslint-disable-line
   .usage('$0 <in-file> [options]')
@@ -57,7 +57,7 @@ const args = require('yargs') // eslint-disable-line
   .argv
 
 if (args.prefix === DEFAULT_PREFIX && args.environment) {
-  args.prefix = `${name}/${args.environment}`
+  args.prefix = args.environment
 }
 
 args.stdio = 'inherit'

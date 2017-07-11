@@ -55,6 +55,11 @@ describe('Etcd', function () {
       return setAll(client, keyList)
     })
 
+    it('does not raise exception if prefix does not yet exist', function () {
+      return etcd.fetchConfig({ prefix: 'batman', sets: [] })
+        .should.eventually.eql({})
+    })
+
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
         .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5', e: 'hello' })

@@ -3,7 +3,7 @@
   "version": "1.1.0",
   "description": "source configuration from various inputs and kick the service when they change",
   "main": "./src/index.js",
-  "bin": "./bin/kickerd",
+  "bin": "./bin/kickerd.js",
   "scripts": {
     "pretest": "standard",
     "test": "node_modules/mocha/bin/mocha ./spec/*.spec.js",

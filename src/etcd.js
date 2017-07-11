@@ -56,9 +56,9 @@ function fetchConfig (client, config) {
         const splitKey = key.split('.')
         // as with the service etcetera (https://github.com/npm/etcetera),
         // we accept keys in the format key.app.group.
-        if (splitKey[2] === config.group) {
+        if (splitKey[1] === config.name && splitKey[2] === config.group) {
           acc[splitKey[0]] = node.value
-        } else if (splitKey[1] === config.name && splitKey[2] === undefined) {
+        } else if (!acc[key] && splitKey[1] === config.name && splitKey[2] === undefined) {
           acc[splitKey[0]] = node.value
         } else if (!acc[key] && splitKey[1] === undefined) {
           acc[key] = node.value

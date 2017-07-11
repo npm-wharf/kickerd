@@ -21,11 +21,11 @@ class Definition {
   }
 
   getType (value) {
-    let type = 'number'
+    let type = 'string'
     if (value === true || value === false || /(true|false)/.test(value)) {
       type = 'boolean'
-    } else if (/['"A-Za-z]/.test(value)) {
-      type = 'string'
+    } else if (/^-?[0-9.]*$/.test(value)) {
+      type = 'number'
     }
     return type
   }

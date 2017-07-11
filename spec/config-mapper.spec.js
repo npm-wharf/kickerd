@@ -17,72 +17,72 @@ describe('Config Mapper', function () {
   })
 
   it('should backfill start using main property when start property and start script is missing', function () {
-    hashOne.should.eql({
+    return hashOne.should.partiallyEql({
       name: 'test-app-1',
       description: 'test description 1',
       start: 'node ./src/index.js',
       sets: [
-        { env: 'TITLE', key: 'site-title', default: 'Demo', type: 'string' },
-        { env: 'PORT', key: 'site-port', default: 8008, type: 'number' },
-        { env: 'MOTD', key: 'site-motd', default: 'Ohhai, it\'s a thing', type: 'string' },
+        { env: 'TITLE', key: 'site-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', key: 'site-port', value: 8008, type: 'number' },
+        { env: 'MOTD', key: 'site-motd', value: 'Ohhai, it\'s a thing', type: 'string' },
         { env: 'ORG', key: 'site-org' }
       ]
     })
   })
 
   it('should backfill name and description with package properties', function () {
-    hashTwo.should.eql({
+    return hashTwo.should.partiallyEql({
       name: 'kickerd',
       description: 'source configuration from various inputs and kick the service when they change',
       start: 'node ./src',
       sets: [
-        { env: 'TITLE', key: 'site-title', default: 'Demo', type: 'string' },
-        { env: 'PORT', key: 'site-port', default: 8008, type: 'number' },
-        { env: 'MOTD', key: 'site-motd', default: 'Ohhai, it\'s a thing', type: 'string' },
+        { env: 'TITLE', key: 'site-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', key: 'site-port', value: 8008, type: 'number' },
+        { env: 'MOTD', key: 'site-motd', value: 'Ohhai, it\'s a thing', type: 'string' },
         { env: 'ORG', key: 'site-org' }
       ]
     })
   })
 
   it('should support `app` in place of name', function () {
-    hashThree.should.eql({
+    return hashThree.should.partiallyEql({
       name: 'test-app-1',
       description: 'test description 1',
       start: 'node ./src/index.js',
       sets: [
-        { env: 'TITLE', key: 'site-title', default: 'Demo', type: 'string' },
-        { env: 'PORT', key: 'site-port', default: 8008, type: 'number' },
-        { env: 'MOTD', key: 'site-motd', default: 'Ohhai, it\'s a thing', type: 'string' },
+        { env: 'TITLE', key: 'site-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', key: 'site-port', value: 8008, type: 'number' },
+        { env: 'MOTD', key: 'site-motd', value: 'Ohhai, it\'s a thing', type: 'string' },
         { env: 'ORG', key: 'site-org' }
       ]
     })
   })
 
   it('should tie in argument list', function () {
-    hashFour.should.eql({
+    return hashFour.should.partiallyEql({
       name: 'test-app-1',
       description: 'test description 1',
       start: 'node ./src/index.js',
       sets: [
-        { env: 'TITLE', key: 'site-title', argument: 'page-title', default: 'Demo', type: 'string' },
-        { env: 'PORT', key: 'site-port', argument: 'host-port', default: 8008, type: 'number' },
-        { env: 'MOTD', key: 'site-motd', argument: 'message-of-the-day', default: 'Ohhai, it\'s a thing', type: 'string' },
+        { env: 'TITLE', key: 'site-title', argument: 'page-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', key: 'site-port', argument: 'host-port', value: 8008, type: 'number' },
+        { env: 'MOTD', key: 'site-motd', argument: 'message-of-the-day', value: 'Ohhai, it\'s a thing', type: 'string' },
         { env: 'ORG', key: 'site-org' }
       ]
     })
   })
 
   it('should tie in argument list with defaults', function () {
-    hashFive.should.eql({
+    return hashFive.should.partiallyEql({
       name: 'test-app-1',
       description: 'test description 1',
       start: 'node ./src/index.js',
       sets: [
-        { env: 'TITLE', key: 'site-title', argument: 'page-title', default: 'Demo', type: 'string' },
-        { env: 'PORT', argument: 'host-port', default: 8008, type: 'number' },
-        { env: 'MOTD', key: 'site-motd', argument: 'message-of-the-day', default: 'Ohhai, it\'s a thing', type: 'string' },
-        { env: 'ORG', argument: 'org-name', default: 'Acme', type: 'string' },
-        { env: 'RESTART', argument: 'restart-on-fail', default: true, type: 'boolean' }
+        { env: 'TITLE', key: 'site-title', argument: 'page-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', argument: 'host-port', value: 8008, type: 'number' },
+        { env: 'MOTD', key: 'site-motd', argument: 'message-of-the-day', value: 'Ohhai, it\'s a thing', type: 'string' },
+        { env: 'ORG', argument: 'org-name', value: 'Acme', type: 'string' },
+        { env: 'RESTART', argument: 'restart-on-fail', value: true, type: 'boolean' }
       ]
     })
   })

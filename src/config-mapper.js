@@ -3,6 +3,7 @@ const path = require('path')
 const toml = require('toml-j0.4')
 const packagePath = path.resolve(process.cwd(), './package.json')
 const servicePackage = require(packagePath)
+const Definition = require('./definition')
 
 function getSet (sets, env) {
   let index = -1
@@ -13,15 +14,6 @@ function getSet (sets, env) {
     }
   }
   return index >= 0 ? sets[index] : null
-}
-
-function setDefaultValue (set, value) {
-  if (value === true || value === false || /(true|false)/.test(value)) {
-    set.type = 'boolean'
-  } else {
-    set.type = /['"A-Za-z]/.test(value) ? 'string' : 'number'
-  }
-  set.default = value
 }
 
 function load (configFile) {
@@ -37,32 +29,47 @@ function load (configFile) {
     sets: []
   }
 
+  const envs = {}
+
+  // traverse environment stanza first
+  // then arguments next building up arg sets
+  // to make it easy to call constructor on
+  // Definition. Multi passes are ok,
+  // config sets aren't unbounded and this is
+  // on start-up.
   for (let key in config.environment) {
-    let value = config.environment[ key ]
-    const set = { env: key }
+    const value = config.environment[ key ]
+    const definition = {}
     if (/^[{{].+[}}]$/.test(value)) {
-      set.key = value.replace(/[}{]/g, '')
+      definition.key = value.replace(/[}{]/g, '')
     } else {
-      setDefaultValue(set, value)
+      definition.default = value
     }
     if (config.default && config.default[key]) {
-      setDefaultValue(set, config.default[key])
+      definition.default = config.default[key]
     }
-    hash.sets.push(set)
+    envs[key] = definition
   }
 
   for (let key in config.argument) {
     let value = config.argument[ key ]
-    let set = getSet(hash.sets, value)
-    if (!set) {
-      set = { env: value }
-      hash.sets.push(set)
+    let definition = envs[ value ]
+    if (!definition) {
+      definition = {}
+      envs[ value ] = definition
     }
-    set.argument = key
-    if (!set.default && config.default && config.default[value]) {
-      setDefaultValue(set, config.default[value])
+    definition.argument = key
+    if (!definition.default && config.default && config.default[value]) {
+      definition.default = config.default[value]
     }
   }
+
+  for (let key in envs) {
+    const value = envs[ key ]
+    const definition = new Definition(key, value.default, value.key, value.argument)
+    hash.sets.push(definition)
+  }
+
   return hash
 }
 

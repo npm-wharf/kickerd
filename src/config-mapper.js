@@ -5,17 +5,6 @@ const packagePath = path.resolve(process.cwd(), './package.json')
 const servicePackage = require(packagePath)
 const Definition = require('./definition')
 
-function getSet (sets, env) {
-  let index = -1
-  for (var i = 0; i < sets.length; i++) {
-    if (sets[i].env === env) {
-      index = i
-      break
-    }
-  }
-  return index >= 0 ? sets[index] : null
-}
-
 function load (configFile) {
   const fullPath = path.resolve(configFile)
   const raw = fs.readFileSync(fullPath, 'utf8')

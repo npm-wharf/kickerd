@@ -1,41 +1,50 @@
 const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
+const Definition = require('./definition')
 const DEFAULT_URL = 'http://localhost:2379'
 const LOCK_ID = 'kickerd'
 const LOCK_TTL = 5
 
 function applyChange (config, change) {
   let match = false
-  const key = getKey(config.prefix, change.node.key)
+  let changed = false
+  const [key, name, group] = getKey(config.prefix, change.node.key)
   const value = change.node.value
-  config.sets.forEach(set => {
-    if (set.key === key) {
-      if (change.action === 'set') {
-        set.value = value
-      } else if (change.action === 'delete') {
-        delete set.value
-      }
+  const level = group ? 4 : (name ? 3 : 2)
+  config.sets.forEach(definition => {
+    if (definition.key === key) {
       match = true
+      if (level >= definition.level) {
+        if (change.action === 'set') {
+          definition.setValue(value, level)
+        } else if (change.action === 'delete') {
+          definition.clearValue(value, level)
+        }
+        changed = true
+      }
     }
   })
   if (!match && change.action === 'set') {
-    config.sets.push({
-      key: key,
-      value: value,
-      type: /['"A-Za-z]/.test(value) ? 'string' : 'number'
-    })
+    const definition = new Definition(toEnvKey(key), null, key)
+    definition.setValue(value, level)
+    config.sets.push(definition)
+    change.action = 'add'
+    changed = true
   }
+  return changed
 }
 
 function applyKeys (config, keys) {
-  config.sets.forEach(set => {
-    const etcdValue = keys[set.key]
-    if (etcdValue) {
-      if (!set.type) {
-        set.type = /['"A-Za-z:]/.test(etcdValue) ? 'string' : 'number'
+  config.sets.forEach(definition => {
+    const levels = keys[definition.key]
+    if (levels && levels.length > 0) {
+      for (let i = 0; i < levels.length; i++) {
+        const value = levels[i]
+        if (value != null) {
+          definition.setValue(value, i)
+        }
       }
-      set.value = etcdValue
     }
   })
   return config
@@ -50,18 +59,17 @@ function fetchConfig (client, config) {
         nodes: []
       }}
     })
-    .then((reponse) => {
-      const allKeys = reponse.node.nodes.map(node => { return node.key })
-      return reponse.node.nodes.reduce((acc, node) => {
-        const [key, name, group] = getKey(config.prefix, node.key).split('.')
+    .then((response) => {
+      return response.node.nodes.reduce((acc, node) => {
+        const [key, name, group] = getKey(config.prefix, node.key)
         // as with the service etcetera (https://github.com/npm/etcetera),
         // we accept keys in the format key.app.group.
         if (name === config.name && group === config.group) {
-          acc[key] = node.value
-        } else if (name === config.name && allKeys.indexOf(`${key}.${name}.${group}`) === -1) {
-          acc[key] = node.value
-        } else if (!acc[key] && name === undefined) {
-          acc[key] = node.value
+          pushKey(acc, key, node.value, 4)
+        } else if (name === config.name) {
+          pushKey(acc, key, node.value, 3)
+        } else if (name === undefined) {
+          pushKey(acc, key, node.value, 2)
         }
         return acc
       }, {})
@@ -73,7 +81,7 @@ function fetchConfig (client, config) {
 }
 
 function getKey (prefix, fullKey) {
-  return fullKey.split(prefix)[1].slice(1)
+  return fullKey.split(prefix)[1].slice(1).split('.')
 }
 
 function lockRestart (client, config) {
@@ -84,10 +92,25 @@ function lockRestart (client, config) {
   return config.lock
 }
 
+function pushKey (acc, key, value, level) {
+  let values = acc[key]
+  if (!values) {
+    values = Array(5)
+  }
+  values[level] = value
+  acc[key] = values
+}
+
+function toEnvKey (key) {
+  return key.toUpperCase().replace(/[-]/g, '_')
+}
+
 function watch (client, config, onChange) {
   const watcher = client.watcher(config.prefix, null, {recursive: true})
   watcher.on('change', (change) => {
-    applyChange(config, change)
+    if (applyChange(config, change) === false) {
+      change.action = 'ignore'
+    }
     onChange(change)
   })
   config.watcher = watcher

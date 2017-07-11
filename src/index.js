@@ -7,6 +7,9 @@ const processHost = require('./process-host')
 const RETRY_TIMEOUT = 5
 
 function configurationChanged (configuration, etcd, change) {
+  if (change.action !== 'ignore') {
+    return
+  }
   log.info(`Configuration change detected ${change.node.key}`)
   if (configuration.lockRestart) {
     const lock = etcd.lockRestart(configuration)

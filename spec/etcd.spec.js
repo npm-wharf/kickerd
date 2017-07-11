@@ -1,7 +1,9 @@
+/* eslint-disable no-sparse-arrays */
 require('./setup')
 
 const Etcd = require('node-etcd')
 const etcdFn = require('../src/etcd')
+const Definition = require('../src/definition')
 const ETCD_URL = 'http://localhost:2379'
 const PREFIX = 'development'
 const NAME = 'kickerd'
@@ -25,6 +27,11 @@ function setAll (client, list) {
   )
 }
 
+function initConfig (hash) {
+  hash.sets = hash.sets.map(x => new Definition(x.key.toUpperCase(), null, x.key))
+  return hash
+}
+
 describe('Etcd', function () {
   const client = new Etcd(ETCD_URL)
   let etcd
@@ -37,7 +44,7 @@ describe('Etcd', function () {
     { key: `d.${NAME}`, value: '5' },
     { key: `e.${NAME}.${GROUP}`, value: 'hello' }
   ]
-  let config = {
+  let config = initConfig({
     prefix: PREFIX,
     group: GROUP,
     name: NAME,
@@ -48,7 +55,7 @@ describe('Etcd', function () {
       { key: 'd' },
       { key: 'e' }
     ]
-  }
+  })
   describe('when fetching initial keys', function () {
     before(function () {
       etcd = etcdFn({url: ETCD_URL})
@@ -62,17 +69,51 @@ describe('Etcd', function () {
 
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
-        .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5', e: 'hello' })
+        .should.eventually.partiallyEql({
+          a: [ , , '1' ],
+          b: [ , , '2' ],
+          c: [ , , '3' ],
+          d: [ , , '4', '5' ],
+          e: [ , , '6', , 'hello' ]
+        })
     })
 
     it('should apply keys to configuration', function () {
-      return config.sets.should.eql([
-        { key: 'a', value: '1', type: 'number' },
-        { key: 'b', value: '2', type: 'number' },
-        { key: 'c', value: '3', type: 'number' },
-        { key: 'd', value: '5', type: 'number' },
-        { key: 'e', value: 'hello', type: 'string' }
+      return config.sets.should.partiallyEql([
+        { key: 'a', value: '1', type: 'number', level: 2 },
+        { key: 'b', value: '2', type: 'number', level: 2 },
+        { key: 'c', value: '3', type: 'number', level: 2 },
+        { key: 'd', value: '5', type: 'number', level: 3 },
+        { key: 'e', value: 'hello', type: 'string', level: 4 }
       ])
+    })
+
+    describe('when watched key changes at same level of specificity', function () {
+      let changed
+      before(function (done) {
+        etcd.watch(config, (x) => {
+          changed = x
+          done()
+        })
+        setTimeout(() => set(client, `a`, '1.5'), 50)
+      })
+
+      it('should pick up change', function () {
+        changed.action.should.eql('set')
+        changed.node.key.should.eql(`/${PREFIX}/a`)
+        changed.node.value.should.eql('1.5')
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.5', type: 'number', level: 2 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '5', type: 'number', level: 3 },
+          { key: 'e', value: 'hello', type: 'string', level: 4 }
+        ])
+      })
+
+      after(function () {
+        config.watcher.stop()
+      })
     })
 
     describe('when watched key changes', function () {
@@ -82,19 +123,19 @@ describe('Etcd', function () {
           changed = x
           done()
         })
-        setTimeout(() => set(client, 'a', '1.1'), 50)
+        setTimeout(() => set(client, `a.${NAME}`, '1.1'), 50)
       })
 
       it('should pick up change', function () {
         changed.action.should.eql('set')
-        changed.node.key.should.eql(`/${PREFIX}/a`)
+        changed.node.key.should.eql(`/${PREFIX}/a.${NAME}`)
         changed.node.value.should.eql('1.1')
-        config.sets.should.eql([
-          { key: 'a', value: '1.1', type: 'number' },
-          { key: 'b', value: '2', type: 'number' },
-          { key: 'c', value: '3', type: 'number' },
-          { key: 'd', value: '5', type: 'number' },
-          { key: 'e', value: 'hello', type: 'string' }
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.1', type: 'number', level: 3 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '5', type: 'number', level: 3 },
+          { key: 'e', value: 'hello', type: 'string', level: 4 }
         ])
       })
 
@@ -103,7 +144,7 @@ describe('Etcd', function () {
       })
     })
 
-    describe('when watched prefix adds a key', function () {
+    describe('when watched prefix changes key at less specific level', function () {
       let changed
       before(function (done) {
         etcd.watch(config, (x) => {
@@ -113,16 +154,16 @@ describe('Etcd', function () {
         setTimeout(() => set(client, 'd', '4'), 50)
       })
 
-      it('should pick up add', function () {
-        changed.action.should.eql('set')
+      it('should not overwrite value and changed should be ignore', function () {
+        changed.action.should.eql('ignore')
         changed.node.key.should.eql(`/${PREFIX}/d`)
         changed.node.value.should.eql('4')
-        config.sets.should.eql([
-          { key: 'a', value: '1.1', type: 'number' },
-          { key: 'b', value: '2', type: 'number' },
-          { key: 'c', value: '3', type: 'number' },
-          { key: 'd', value: '4', type: 'number' },
-          { key: 'e', value: 'hello', type: 'string' }
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.1', type: 'number', level: 3 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '5', type: 'number', level: 3 },
+          { key: 'e', value: 'hello', type: 'string', level: 4 }
         ])
       })
 
@@ -131,20 +172,57 @@ describe('Etcd', function () {
       })
     })
 
-    describe('when watched prefix removes a key', function () {
+    describe('when watched prefix adds a new key', function () {
       let changed
       before(function (done) {
         etcd.watch(config, (x) => {
           changed = x
           done()
         })
-        setTimeout(() => client.del(`${PREFIX}/d`), 50)
+        setTimeout(() => set(client, 'f', '6'), 50)
       })
 
-      it('should pick up delete', function () {
+      it('should pick up add', function () {
+        changed.action.should.eql('add')
+        changed.node.key.should.eql(`/${PREFIX}/f`)
+        changed.node.value.should.eql('6')
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.1', type: 'number', level: 3 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '5', type: 'number', level: 3 },
+          { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'f', value: '6', type: 'number', level: 2 }
+        ])
+      })
+
+      after(function () {
+        config.watcher.stop()
+      })
+    })
+
+    describe('when watched prefix removes a key at highest specificity', function () {
+      let changed
+      before(function (done) {
+        etcd.watch(config, (x) => {
+          changed = x
+          done()
+        })
+        setTimeout(() => client.del(`${PREFIX}/d.${NAME}`), 50)
+      })
+
+      it('should pick up delete and fall back to previous level', function () {
         changed.action.should.eql('delete')
-        changed.node.key.should.eql(`/${PREFIX}/d`)
-        changed.prevNode.value.should.eql('4')
+        changed.node.key.should.eql(`/${PREFIX}/d.${NAME}`)
+        changed.prevNode.value.should.eql('5')
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.1', type: 'number', level: 3 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '4', type: 'number', level: 2 },
+          { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'f', value: '6', type: 'number', level: 2 }
+        ])
       })
 
       after(function () {

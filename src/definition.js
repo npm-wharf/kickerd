@@ -29,6 +29,20 @@ class Definition {
     }
     return type
   }
+
+  clearValue (value, level) {
+    this.values[ level ] = null
+    while (--level > 0 && this.values[ level ] == null) {}
+    this.level = level || 0
+  }
+
+  setValue (value, level) {
+    this.type = this.getType(value)
+    this.values[ level ] = value
+    if (level > this.level) {
+      this.level = level
+    }
+  }
 }
 
 module.exports = Definition

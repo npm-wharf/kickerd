@@ -184,6 +184,8 @@ kickerd --etcd=http://etcd:2379 --bootstrap=true
 
 ## Setting Configuration
 
+The simplest way to configure your app is to use the tool [furthermore](https://www.npmjs.com/package/furthermore).
+
 ### Global Keys
 
 When keys used between multiple services, e.g., shared AWS credentials, simply use the prefix of `${environment}/${key}`.

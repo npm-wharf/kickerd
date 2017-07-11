@@ -51,16 +51,16 @@ function fetchConfig (client, config) {
       }}
     })
     .then((reponse) => {
+      const allKeys = reponse.node.nodes.map(node => { return node.key })
       return reponse.node.nodes.reduce((acc, node) => {
-        const key = getKey(config.prefix, node.key)
-        const splitKey = key.split('.')
+        const [key, name, group] = getKey(config.prefix, node.key).split('.')
         // as with the service etcetera (https://github.com/npm/etcetera),
         // we accept keys in the format key.app.group.
-        if (splitKey[1] === config.name && splitKey[2] === config.group) {
-          acc[splitKey[0]] = node.value
-        } else if (!acc[key] && splitKey[1] === config.name && splitKey[2] === undefined) {
-          acc[splitKey[0]] = node.value
-        } else if (!acc[key] && splitKey[1] === undefined) {
+        if (name === config.name && group === config.group) {
+          acc[key] = node.value
+        } else if (name === config.name && allKeys.indexOf(`${key}.${name}.${group}`) === -1) {
+          acc[key] = node.value
+        } else if (!acc[key] && name === undefined) {
           acc[key] = node.value
         }
         return acc

@@ -48,8 +48,7 @@ This is also not a process manager in the sense that it will keep your process r
 There are three top level properties:
 
  * `name`|`app` - (optional) the title of the process, will use the package.json `name` if omitted. When fetching keys
- kickerd first checks `${prefix}/${name}` prior to checking
- the global `${prefix}` configuration.
+ kickerd first checks `${key}.${app}` prior to checking `${key}`.
  * `description` - (optional) the description, will use the package.json `description` if omitted
  * `start` - how to start the process, will attempt to use package.json `start` script if available
 

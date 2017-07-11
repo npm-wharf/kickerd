@@ -2,8 +2,6 @@
 const bole = require('bole')
 const path = require('path')
 const kickerd = require('../src')
-const readPkgUp = require('read-pkg-up')
-const pkg = readPkgUp.sync()
 const DEFAULT_PREFIX = process.env.NODE_ENV || 'production'
 
 const args = require('yargs') // eslint-disable-line
@@ -12,6 +10,10 @@ const args = require('yargs') // eslint-disable-line
     alias: 'p',
     default: DEFAULT_PREFIX,
     description: 'the etcd prefix to use for all keys.'
+  })
+  .option('group', {
+    alias: 'p',
+    description: 'configure the app to run with a different config group, e.g., replica vs. primary.'
   })
   .option('file', {
     alias: 'f',

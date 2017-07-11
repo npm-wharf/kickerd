@@ -5,6 +5,7 @@ const etcdFn = require('../src/etcd')
 const ETCD_URL = 'http://localhost:2379'
 const PREFIX = 'development'
 const NAME = 'kickerd'
+const GROUP = 'replica'
 
 function set (client, key, value) {
   return new Promise(function (resolve, reject) {
@@ -32,16 +33,20 @@ describe('Etcd', function () {
     { key: 'b', value: '2' },
     { key: 'c', value: '3' },
     { key: 'd', value: '4' },
-    { key: `${NAME}/d`, value: '5' }
+    { key: 'e', value: '6' },
+    { key: `d.${NAME}`, value: '5' },
+    { key: `e.${NAME}.${GROUP}`, value: 'hello' }
   ]
   let config = {
     prefix: PREFIX,
+    group: GROUP,
     name: NAME,
     sets: [
       { key: 'a' },
       { key: 'b' },
       { key: 'c' },
-      { key: 'd' }
+      { key: 'd' },
+      { key: 'e' }
     ]
   }
   describe('when fetching initial keys', function () {
@@ -52,7 +57,7 @@ describe('Etcd', function () {
 
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
-        .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5' })
+        .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5', e: 'hello' })
     })
 
     it('should apply keys to configuration', function () {
@@ -60,7 +65,8 @@ describe('Etcd', function () {
         { key: 'a', value: '1', type: 'number' },
         { key: 'b', value: '2', type: 'number' },
         { key: 'c', value: '3', type: 'number' },
-        { key: 'd', value: '5', type: 'number' }
+        { key: 'd', value: '5', type: 'number' },
+        { key: 'e', value: 'hello', type: 'string' }
       ])
     })
 
@@ -82,7 +88,8 @@ describe('Etcd', function () {
           { key: 'a', value: '1.1', type: 'number' },
           { key: 'b', value: '2', type: 'number' },
           { key: 'c', value: '3', type: 'number' },
-          { key: 'd', value: '5', type: 'number' }
+          { key: 'd', value: '5', type: 'number' },
+          { key: 'e', value: 'hello', type: 'string' }
         ])
       })
 
@@ -109,7 +116,8 @@ describe('Etcd', function () {
           { key: 'a', value: '1.1', type: 'number' },
           { key: 'b', value: '2', type: 'number' },
           { key: 'c', value: '3', type: 'number' },
-          { key: 'd', value: '4', type: 'number' }
+          { key: 'd', value: '4', type: 'number' },
+          { key: 'e', value: 'hello', type: 'string' }
         ])
       })
 

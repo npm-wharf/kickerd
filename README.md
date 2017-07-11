@@ -100,6 +100,8 @@ Argument list:
  * `--file` - default `.kicker.toml` - the configuration file to use
  * `--prefix` - provide an explicit etcd key prefix to use when
    fetching keys (defaults to `NODE_ENV`).
+ * `--group` - allow an application to be run in a different
+  config group, e.g., replica vs. primary.
  * `--lock-restart` - default `true` - limit instance restarts to one at a time using an etcd key for locking
  * `--lock-ttl` - default `5` - seconds the restart lock will stay in etcd (prevents deadlocks)
  * `--debug` - print out environment values - DO NOT DO THIS IN PROD, IT WILL TELL YOUR SECRETS TO THE LOG
@@ -183,14 +185,19 @@ kickerd --etcd=http://etcd:2379 --bootstrap=true
 
 ## Setting Configuration
 
+### Global Keys
+
+When keys used between multiple services, e.g., shared AWS credentials, simply use the prefix of `${environment}/${key}`.
+
 ### App Specific Keys
 
 To set config on an application specific basis, simply use
-the prefix `${environment}/${app}`, where `app` is the name configured in `.kicker.toml`.
+the prefix `${environment}/${key}.${app}`, where `app` is the name configured in `.kicker.toml`.
 
-### Global Keys
+### Group Specific Keys
 
-When keys used between multiple services, e.g., shared AWS credentials, simply use the prefix of `${environment}`.
+You can provide even finer grained config using a group, simply use
+the prefix `${environment}/${key}.${app}.${group}`, where `group` represents a different category of application.
 
 ## Running Tests
 

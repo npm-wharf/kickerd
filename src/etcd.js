@@ -43,32 +43,33 @@ function applyKeys (config, keys) {
 
 function fetchConfig (client, config) {
   const get = Promise.promisify(client.get, {context: client})
-  return Promise.join(
-    get(`${config.prefix}/${config.name}`),
-    get(config.prefix)
-  ).spread((serviceConfig, globalConfig) => {
-    serviceConfig = serviceConfig.node.nodes.reduce((acc, node) => {
-      const key = getKey(`${config.prefix}/${config.name}`, node.key)
-      acc[key] = node.value
-      return acc
-    }, {})
-    // merge service specific config and config in
-    // top-level key.
-    return globalConfig.node.nodes.reduce((acc, node) => {
-      if (node.dir) return acc
-      const key = getKey(config.prefix, node.key)
-      if (serviceConfig[key]) {
-        acc[key] = serviceConfig[key]
+  return get(config.prefix)
+    .catch({ errorCode: 100 }, () => {
+      // 'Key not found' error.
+      return {node: {
+        nodes: []
+      }}
+    })
+    .then((reponse) => {
+      return reponse.node.nodes.reduce((acc, node) => {
+        const key = getKey(config.prefix, node.key)
+        const splitKey = key.split('.')
+        // as with the service etcetera (https://github.com/npm/etcetera),
+        // we accept keys in the format key.app.group.
+        if (splitKey[2] === config.group) {
+          acc[splitKey[0]] = node.value
+        } else if (splitKey[1] === config.name && splitKey[2] === undefined) {
+          acc[splitKey[0]] = node.value
+        } else if (!acc[key] && splitKey[1] === undefined) {
+          acc[key] = node.value
+        }
         return acc
-      }
-      acc[key] = node.value
-      return acc
-    }, {})
-  })
-  .then((hash) => {
-    applyKeys(config, hash)
-    return hash
-  })
+      }, {})
+    })
+    .then((hash) => {
+      applyKeys(config, hash)
+      return hash
+    })
 }
 
 function getKey (prefix, fullKey) {

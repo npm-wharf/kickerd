@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
 const DEFAULT_URL = 'http://localhost:2379'
@@ -41,21 +42,34 @@ function applyKeys (config, keys) {
 }
 
 function fetchConfig (client, config) {
-  return new Promise((resolve, reject) => {
-    client.get(config.prefix, (err, response) => {
-      if (err) {
-        reject(err)
-      } else {
-        const hash = response.node.nodes.reduce((acc, node) => {
-          const key = getKey(config.prefix, node.key)
-          acc[key] = node.value
-          return acc
-        }, {})
-        applyKeys(config, hash)
-        resolve(hash)
-      }
+  const get = Promise.promisify(client.get, {context: client})
+  return get(config.prefix)
+    .catch({ errorCode: 100 }, () => {
+      // 'Key not found' error.
+      return {node: {
+        nodes: []
+      }}
     })
-  })
+    .then((reponse) => {
+      const allKeys = reponse.node.nodes.map(node => { return node.key })
+      return reponse.node.nodes.reduce((acc, node) => {
+        const [key, name, group] = getKey(config.prefix, node.key).split('.')
+        // as with the service etcetera (https://github.com/npm/etcetera),
+        // we accept keys in the format key.app.group.
+        if (name === config.name && group === config.group) {
+          acc[key] = node.value
+        } else if (name === config.name && allKeys.indexOf(`${key}.${name}.${group}`) === -1) {
+          acc[key] = node.value
+        } else if (!acc[key] && name === undefined) {
+          acc[key] = node.value
+        }
+        return acc
+      }, {})
+    })
+    .then((hash) => {
+      applyKeys(config, hash)
+      return hash
+    })
 }
 
 function getKey (prefix, fullKey) {

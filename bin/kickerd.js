@@ -2,23 +2,18 @@
 const bole = require('bole')
 const path = require('path')
 const kickerd = require('../src')
-const readPkgUp = require('read-pkg-up')
-const pkg = readPkgUp.sync()
-const nameParts = pkg.pkg.name.split('/')
-const name = nameParts.length > 1 ? nameParts[ 1 ] : nameParts[ 0 ]
-const DEFAULT_PREFIX = `${name}/production`
+const DEFAULT_PREFIX = process.env.NODE_ENV || 'production'
 
 const args = require('yargs') // eslint-disable-line
   .usage('$0 <in-file> [options]')
   .option('prefix', {
     alias: 'p',
-    default: pkg ? DEFAULT_PREFIX : undefined,
+    default: DEFAULT_PREFIX,
     description: 'the etcd prefix to use for all keys.'
   })
-  .option('environment', {
-    alias: 'e',
-    default: 'production',
-    description: 'the environment to use in constructing a prefix'
+  .option('group', {
+    alias: 'p',
+    description: 'run the app with a different config group, e.g., replica vs. primary.'
   })
   .option('file', {
     alias: 'f',
@@ -55,10 +50,6 @@ const args = require('yargs') // eslint-disable-line
   .alias('help', 'h')
   .version()
   .argv
-
-if (args.prefix === DEFAULT_PREFIX && args.environment) {
-  args.prefix = `${name}/${args.environment}`
-}
 
 args.stdio = 'inherit'
 const logStream = {

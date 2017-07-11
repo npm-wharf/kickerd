@@ -47,7 +47,8 @@ This is also not a process manager in the sense that it will keep your process r
 
 There are three top level properties:
 
- * `name`|`app` - (optional) the title of the process, will use the package.json `name` if omitted
+ * `name`|`app` - (optional) the title of the process, will use the package.json `name` if omitted. When fetching keys
+ kickerd first checks `${key}.${app}` prior to checking `${key}`.
  * `description` - (optional) the description, will use the package.json `description` if omitted
  * `start` - how to start the process, will attempt to use package.json `start` script if available
 
@@ -80,7 +81,7 @@ start = "node ./index.js"
   message-of-the-day = "MOTD"
 ```
 
- * When a key isn't available in the data source (etcd), then the environment variable's value will be used. 
+ * When a key isn't available in the data source (etcd), then the environment variable's value will be used.
  * If the environment variable is empty, then a default value (if one was provided) will be used.
  * If no default variable was provided, then a warning will be logged to stdout before starting the service.
  * Arguments **must** map to environment variables
@@ -96,8 +97,10 @@ kickerd
 Argument list:
 
  * `--file` - default `.kicker.toml` - the configuration file to use
- * `--environment` - default `production` the environment prefix to use with the name to create etcd key prefix
- * `--prefix` - provide an explicit etcd key prefix for all keys
+ * `--prefix` - provide an explicit etcd key prefix to use when
+   fetching keys (defaults to `NODE_ENV`).
+ * `--group` - allow an application to be run in a different
+  config group, e.g., replica vs. primary.
  * `--lock-restart` - default `true` - limit instance restarts to one at a time using an etcd key for locking
  * `--lock-ttl` - default `5` - seconds the restart lock will stay in etcd (prevents deadlocks)
  * `--debug` - print out environment values - DO NOT DO THIS IN PROD, IT WILL TELL YOUR SECRETS TO THE LOG
@@ -127,7 +130,7 @@ The express app gets the process title, port and response content from etcd. Usi
  * `http/development/site-motd`
  * `http/development/site-port`
 
-The goal of the example is to provide a simple working implementation that allows you to test ideas and also see what's involved in using it. The largest overhead is getting your own etcd cluster setup. 
+The goal of the example is to provide a simple working implementation that allows you to test ideas and also see what's involved in using it. The largest overhead is getting your own etcd cluster setup.
 
 ### containers
 
@@ -137,7 +140,7 @@ The goal of the example is to provide a simple working implementation that allow
 ## How To Bake Kickerd Into Your Own Docker Images
 
 The docker image included in the example isn't super useful. There are three steps to using kickerd:
- 
+
  1. a RUN step (or addition to an existing one) that installs kickerd as a global npm module
  1. creating a `.kicker.toml` file
  1. creating a start script for your docker image to call kickerd
@@ -178,6 +181,24 @@ __To Generate A BootStrap Script__
 kickerd --etcd=http://etcd:2379 --bootstrap=true
 ./bootstrap.sh
 ```
+
+## Setting Configuration
+
+The simplest way to configure your app is to use the tool [furthermore](https://www.npmjs.com/package/furthermore).
+
+### Global Keys
+
+When keys used between multiple services, e.g., shared AWS credentials, simply use the prefix of `${environment}/${key}`.
+
+### App Specific Keys
+
+To set config on an application specific basis, simply use
+the prefix `${environment}/${key}.${app}`, where `app` is the name configured in `.kicker.toml`.
+
+### Group Specific Keys
+
+You can provide even finer grained config using a group, simply use
+the prefix `${environment}/${key}.${app}.${group}`, where `group` represents a different category of application.
 
 ## Running Tests
 

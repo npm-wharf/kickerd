@@ -3,7 +3,9 @@ require('./setup')
 const Etcd = require('node-etcd')
 const etcdFn = require('../src/etcd')
 const ETCD_URL = 'http://localhost:2379'
-const PREFIX = 'kickerd/development'
+const PREFIX = 'development'
+const NAME = 'kickerd'
+const GROUP = 'replica'
 
 function set (client, key, value) {
   return new Promise(function (resolve, reject) {
@@ -29,14 +31,22 @@ describe('Etcd', function () {
   let keyList = [
     { key: 'a', value: '1' },
     { key: 'b', value: '2' },
-    { key: 'c', value: '3' }
+    { key: 'c', value: '3' },
+    { key: 'd', value: '4' },
+    { key: 'e', value: '6' },
+    { key: `d.${NAME}`, value: '5' },
+    { key: `e.${NAME}.${GROUP}`, value: 'hello' }
   ]
   let config = {
     prefix: PREFIX,
+    group: GROUP,
+    name: NAME,
     sets: [
       { key: 'a' },
       { key: 'b' },
-      { key: 'c' }
+      { key: 'c' },
+      { key: 'd' },
+      { key: 'e' }
     ]
   }
   describe('when fetching initial keys', function () {
@@ -45,16 +55,23 @@ describe('Etcd', function () {
       return setAll(client, keyList)
     })
 
+    it('does not raise exception if prefix does not yet exist', function () {
+      return etcd.fetchConfig({ prefix: 'batman', sets: [] })
+        .should.eventually.eql({})
+    })
+
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
-        .should.eventually.eql({ a: '1', b: '2', c: '3' })
+        .should.eventually.eql({ a: '1', b: '2', c: '3', d: '5', e: 'hello' })
     })
 
     it('should apply keys to configuration', function () {
       return config.sets.should.eql([
         { key: 'a', value: '1', type: 'number' },
         { key: 'b', value: '2', type: 'number' },
-        { key: 'c', value: '3', type: 'number' }
+        { key: 'c', value: '3', type: 'number' },
+        { key: 'd', value: '5', type: 'number' },
+        { key: 'e', value: 'hello', type: 'string' }
       ])
     })
 
@@ -75,7 +92,9 @@ describe('Etcd', function () {
         config.sets.should.eql([
           { key: 'a', value: '1.1', type: 'number' },
           { key: 'b', value: '2', type: 'number' },
-          { key: 'c', value: '3', type: 'number' }
+          { key: 'c', value: '3', type: 'number' },
+          { key: 'd', value: '5', type: 'number' },
+          { key: 'e', value: 'hello', type: 'string' }
         ])
       })
 
@@ -102,7 +121,8 @@ describe('Etcd', function () {
           { key: 'a', value: '1.1', type: 'number' },
           { key: 'b', value: '2', type: 'number' },
           { key: 'c', value: '3', type: 'number' },
-          { key: 'd', value: '4', type: 'number' }
+          { key: 'd', value: '4', type: 'number' },
+          { key: 'e', value: 'hello', type: 'string' }
         ])
       })
 

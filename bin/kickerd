@@ -13,7 +13,7 @@ const args = require('yargs') // eslint-disable-line
   })
   .option('group', {
     alias: 'p',
-    description: 'configure the app to run with a different config group, e.g., replica vs. primary.'
+    description: 'run the app with a different config group, e.g., replica vs. primary.'
   })
   .option('file', {
     alias: 'f',

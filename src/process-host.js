@@ -15,21 +15,22 @@ function addSignalHandler (configuration) {
 }
 
 function getArguments (configuration) {
-  return configuration.sets.reduce((args, set) => {
-    if (set.argument) {
-      args.push(`--${set.argument}=${set.value}`)
+  return configuration.sets.reduce((args, definition) => {
+    if (definition.argument) {
+      args.push(`--${definition.argument}=${definition.value}`)
     }
     return args
   }, [])
 }
 
 function mapEnvironment (environment, configuration) {
-  configuration.sets.forEach(set => {
-    let value = set.value || set.default
-    if (set.type === 'number') {
-      environment[set.env] = parseInt(value)
+  configuration.sets.forEach(definition => {
+    if (definition.type === 'number') {
+      environment[definition.env] = parseInt(definition.value)
+    } else if (definition.value === undefined) {
+      environment[definition.env] = ''
     } else {
-      environment[set.env] = value
+      environment[definition.env] = definition.value
     }
   })
 }

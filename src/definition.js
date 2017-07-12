@@ -24,7 +24,7 @@ class Definition {
     let type = 'string'
     if (value === true || value === false || /(true|false)/.test(value)) {
       type = 'boolean'
-    } else if (/^-?[0-9.]*$/.test(value)) {
+    } else if (/^-?[0-9]+\.?[0-9]*$/.test(value)) {
       type = 'number'
     }
     return type

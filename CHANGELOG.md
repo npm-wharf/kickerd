@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/arobson/kickerd/compare/v1.2.0...v1.2.1) (2017-07-12)
+
+
+### Bug Fixes
+
+* remove dependence on old approach to default values in environment map for process host ([4736f9f](https://github.com/arobson/kickerd/commit/4736f9f))
+* set environment equal to '' rather than string 'undefined'; tighten up numeric regex ([6f2b520](https://github.com/arobson/kickerd/commit/6f2b520))
+* tighten up number regex ([#2](https://github.com/arobson/kickerd/issues/2)) ([706c478](https://github.com/arobson/kickerd/commit/706c478))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/arobson/kickerd/compare/v1.1.0...v1.2.0) (2017-07-11)
 

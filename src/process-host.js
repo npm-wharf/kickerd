@@ -25,7 +25,7 @@ function getArguments (configuration) {
 
 function mapEnvironment (environment, configuration) {
   configuration.sets.forEach(set => {
-    let value = set.value !== undefined ? set.value : set.default
+    let value = set.value || set.default
     if (set.type === 'number') {
       environment[set.env] = parseInt(value)
     } else if (set.value === undefined) {

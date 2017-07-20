@@ -1,19 +1,15 @@
-# FROM npmjs/npm-docker-baseline:6.10
-from node:6.11-alpine
+# Set the base image to alpine Node LTS
+FROM node:6-alpine
 
-RUN mkdir -p /src/kickerd && \
-    mkdir -p /src/app
+# File Author / Maintainer
+MAINTAINER Alex Robson <alexr@npmjs.com>
 
-ADD . /src/kickerd
-ADD ./example/app /src/app
+RUN apk update
+RUN apk add curl nano python make g++ git
+RUN npm i node-gyp kickerd@latest -g --unsafe
 
-RUN cd /src/kickerd && \
-    npm i -g && \
-    cd /src/app && \
-    npm i
+RUN mkdir -p /app/src
+WORKDIR /app/src
+COPY ./kick.sh /app/src
 
-WORKDIR /src/app
-
-EXPOSE 8008
-
-CMD ./start.sh
+CMD ./kick.sh

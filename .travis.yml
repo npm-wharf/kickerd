@@ -13,12 +13,17 @@ before_script:
   - ./start-etcd.sh
   - cd example/app && npm i && cd ../../
   - sleep 15
+  - npm i dockyard@latest -g
 
 script:
   - nyc npm test && nyc report --reporter=text-lcov | coveralls
 
 after_script:
   - ./kill-etcd.sh
+
+after_success:
+  - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  - dockyard build image --repo=arobson --name=kickerd
 
 node_js:
   - "6"

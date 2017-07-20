@@ -137,6 +137,54 @@ The goal of the example is to provide a simple working implementation that allow
  * etcd
  * simple express app
 
+## Pre-Baked Docker Image
+
+On the off-chance you want a pre-baked image, you can use `arobson/kickerd:latest` which is based on `node:6-alpine` and has the following:
+
+ * make
+ * g++
+ * python
+ * nano
+ * curl
+ * git
+ * npm@5
+ * node-gyp
+ * kickerd@latest
+
+The `kick.sh` script as the entrypoint which uses the following optional environment variables with default fallbacks:
+
+ * `KICKERFILE` - `./.kicker.toml"`
+ * `KEY_PREFIX` - `production`
+ * `ETCD` - `http://localhost:2379`
+ * `DEBUG` - `false`
+ * `LOCK_RESTART` - `true`
+ * `LOCK_TTL` - `5`
+
+The working directory is `/app/src` so if using this `Dockerfile` as your baseline, you would do something like the following:
+
+```bash
+# Set the base image to alpine Node LTS
+FROM arobson/kickerd:latest
+
+# File Author / Maintainer
+MAINTAINER Your Name<ohhai@you.com>
+
+# copy your source files to files in the working directory
+COPY ./public/ /app/src/public/
+COPY ./server/ /app/src/server/
+COPY ./package.json /app/src/
+COPY ./.kicker.toml /app/src/
+
+# run the npm install
+RUN npm i
+
+# clean up build files to shrink final image size
+RUN npm uninstall node-gyp -g && apk del python make g++ && rm -rf /var/cache/apk/*
+
+# expose whatever port your service uses
+EXPOSE 8000
+``` 
+
 ## How To Bake Kickerd Into Your Own Docker Images
 
 The docker image included in the example isn't super useful. There are three steps to using kickerd:

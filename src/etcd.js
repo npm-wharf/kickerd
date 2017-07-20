@@ -1,6 +1,8 @@
 const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
+const bole = require('bole')
+const log = bole('kickerd')
 const Definition = require('./definition')
 const DEFAULT_URL = 'http://localhost:2379'
 const LOCK_ID = 'kickerd'
@@ -107,10 +109,12 @@ function toEnvKey (key) {
 
 function watch (client, config, onChange) {
   const watcher = client.watcher(config.prefix, null, {recursive: true})
+  log.info(`Watching for changes in keyspace ${config.prefix}`)
   watcher.on('change', (change) => {
     if (applyChange(config, change) === false) {
       change.action = 'ignore'
     }
+    log.info(`change '${change.action}' detected in key ${change.node.key}`)
     onChange(change)
   })
   config.watcher = watcher

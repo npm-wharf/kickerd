@@ -5,11 +5,20 @@ services:
     ports:
       - "2379:2379"
       - "2380:2380"
+  etcdeck:
+    image: arobson/etcdeck:latest
+    depends_on:
+      - etcd
+    ports:
+      - 8018:8018
+    environment:
+      - ETCD=http://etcd:2379
+      - ETCD_URL=http://etcd:2379
   app:
-    build: ./Dockerfile.demo
+    build:
+      context: ./
+      dockerfile: Dockerfile.demo
+    depends_on:
+      - etcd
     ports:
       - 8008:8008
-    volumes:
-      - type: bind
-        source: ./example/app
-        target: /src/app

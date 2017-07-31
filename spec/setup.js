@@ -3,6 +3,9 @@ chai.should()
 global.expect = chai.expect
 chai.use(require('chai-as-promised'))
 
+global.sinon = require('sinon')
+chai.use(require('sinon-chai'))
+
 function isObject (value) {
   const type = typeof value
   return value != null && (type === 'object' || type === 'function')

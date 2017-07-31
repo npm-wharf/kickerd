@@ -36,6 +36,11 @@ const args = require('yargs') // eslint-disable-line
     default: 'http://localhost:2379',
     description: 'the etcd URL to connect to'
   })
+  .option('change-wait', {
+    default: 10,
+    description: 'seconds to wait after a change before restarting the service to apply configuration',
+    type: 'number'
+  })
   .option('lock-restart', {
     default: true,
     description: 'limit instance restarts to one at a time using an etcd',
@@ -73,4 +78,4 @@ bole.output({
   stream: logStream
 })
 
-kickerd(args)
+kickerd.kick(args)

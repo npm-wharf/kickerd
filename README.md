@@ -103,6 +103,7 @@ Argument list:
   config group, e.g., replica vs. primary.
  * `--lock-restart` - default `true` - limit instance restarts to one at a time using an etcd key for locking
  * `--lock-ttl` - default `5` - seconds the restart lock will stay in etcd (prevents deadlocks)
+ * `--change-wait` - default `10` - seconds to wait for more changes before restarting to apply a change (acts like debounce)
  * `--debug` - print out environment values - DO NOT DO THIS IN PROD, IT WILL TELL YOUR SECRETS TO THE LOG
  * `--bootstrap` - instead of hosting the process, create a bootstrap shell script that exports the environment
  * `--etcd` - the URL to use for etcd, default is `http://localhost:2379`
@@ -159,6 +160,7 @@ The `kick.sh` script as the entrypoint which uses the following optional environ
  * `DEBUG` - `false`
  * `LOCK_RESTART` - `true`
  * `LOCK_TTL` - `5`
+ * `CHANGE_WAIT` - `10`
 
 The working directory is `/app/src` so if using this `Dockerfile` as your baseline, you would do something like the following:
 

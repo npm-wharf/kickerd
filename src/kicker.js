@@ -2,14 +2,16 @@ const RETRY_TIMEOUT = 5
 const CHANGE_TIMEOUT = 10
 
 class Kicker {
-  constructor (bootStrap, configMapper, Etcd, log, processHost) {
+  constructor (bootStrap, configMapper, Etcd, log, processHost, writer) {
     this.bootStrap = bootStrap
     this.configMapper = configMapper
     this.Etcd = Etcd
     this.log = log
     this.processHost = processHost
-    this.wait = this.wait.bind(this)
+    this.writer = writer
     this.onExit = this.onExit.bind(this)
+    this.wait = this.wait.bind(this)
+    this.writeFiles = this.writeFiles.bind(this)
   }
 
   configurationChanged (change) {
@@ -22,10 +24,14 @@ class Kicker {
           this.onLockFailed.bind(this, change)
         )
     } else {
-      return this.processHost.restart(this.configuration, this.onExit)
-        .then(() => {
-          this.deferredChange.resolve()
-        })
+      return this.processHost.restart(
+        this.configuration,
+        this.writeFiles,
+        this.onExit
+      )
+      .then(() => {
+        this.deferredChange.resolve()
+      })
     }
   }
 
@@ -38,6 +44,7 @@ class Kicker {
 
   initProcess () {
     this.logConfiguration()
+    this.writeFiles()
     if (this.configuration.bootstrap) {
       return this.writeBootStrap()
     } else {
@@ -80,13 +87,17 @@ class Kicker {
   onLock (lock) {
     this.log.info('Restart lock acquired successfully')
     this.logConfiguration(this.configuration)
-    return this.processHost.restart(this.configuration, this.onExit)
-      .then(
-        () => {
-          this.deferredChange.resolve()
-          lock.unlock()
-        }
-      )
+    return this.processHost.restart(
+      this.configuration,
+      this.writeFiles,
+      this.onExit
+    )
+    .then(
+      () => {
+        this.deferredChange.resolve()
+        lock.unlock()
+      }
+    )
   }
 
   onLockFailed (change, err) {
@@ -140,6 +151,14 @@ class Kicker {
           this.log.info('bootstrap file generated successfully')
         }
       )
+  }
+
+  writeFiles () {
+    if (this.writer.hasFiles(this.configuration)) {
+      this.log.info('writing configuration files to disk')
+      return this.writer.writeFiles(this.configuration)
+    }
+    return Promise.resolve()
   }
 }
 

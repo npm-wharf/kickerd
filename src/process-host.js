@@ -52,9 +52,10 @@ function removeShutdownHandler () {
   process.removeAllListeners('exit', onShutdown)
 }
 
-function restart (configuration, onExit) {
+function restart (configuration, beforeStart, onExit) {
   log.info('Restarting service to pick up new configuration values')
   return stop(configuration)
+    .then(() => { return beforeStart() })
     .then(
       () => start(configuration, onExit)
     )

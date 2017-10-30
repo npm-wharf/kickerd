@@ -1,6 +1,9 @@
 require('./setup')
 
 const configMapper = require('../src/config-mapper')
+const writer = require('../src/writer')
+// const HTPASSWD = 'admin:$2a$10$Gc0JyHlN.yqqdHw8.yhUZu.6WSpyV0uoT5sMMEt8HSynupsDO6tbe\n'
+// const TEST_TXT = 'this\nis\na\ntest\n'
 
 describe('Config Mapper', function () {
   let hashOne
@@ -8,12 +11,14 @@ describe('Config Mapper', function () {
   let hashThree
   let hashFour
   let hashFive
+  let hashSix
   before(function () {
     hashOne = configMapper.load('./spec/.kickerd.toml.one')
     hashTwo = configMapper.load('./spec/.kickerd.toml.two')
     hashThree = configMapper.load('./spec/configuration.tmpl.three')
     hashFour = configMapper.load('./spec/.kickerd.toml.three')
     hashFive = configMapper.load('./spec/.kickerd.toml.four')
+    hashSix = configMapper.load('./spec/.kickerd.toml.six')
   })
 
   it('should backfill start using main property when start property and start script is missing', function () {
@@ -85,5 +90,28 @@ describe('Config Mapper', function () {
         { env: 'RESTART', argument: 'restart-on-fail', value: true, type: 'boolean' }
       ]
     })
+  })
+
+  it('should tie in file with defaults', function () {
+    return hashSix.should.partiallyEql({
+      name: 'test-app-1',
+      description: 'test description 1',
+      start: 'node ./src/index.js',
+      sets: [
+        { env: 'TITLE', key: 'site-title', argument: 'page-title', value: 'Demo', type: 'string' },
+        { env: 'PORT', argument: 'host-port', value: 8008, type: 'number' },
+        { file: '/etc/nginx/htpasswd', key: 'nginx-password' },
+        { file: 'spec/test.txt', key: 'test-file' }
+      ]
+    })
+  })
+
+  it('should detect when files are present', function () {
+    writer.hasFiles(hashOne).should.equal(false)
+    writer.hasFiles(hashTwo).should.equal(false)
+    writer.hasFiles(hashThree).should.equal(false)
+    writer.hasFiles(hashFour).should.equal(false)
+    writer.hasFiles(hashFive).should.equal(false)
+    writer.hasFiles(hashSix).should.equal(true)
   })
 })

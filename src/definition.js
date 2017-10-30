@@ -1,5 +1,5 @@
 class Definition {
-  constructor (env, defaultValue, key, argument) {
+  constructor (env, defaultValue, key, argument, file) {
     this.env = env
     this.values = Array(5)
     this.values[0] = defaultValue
@@ -8,6 +8,7 @@ class Definition {
     this.type = this.getType(defaultValue)
     this.key = key
     this.argument = argument
+    this.file = file
   }
 
   get value () {

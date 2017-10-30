@@ -22,7 +22,8 @@ describe('Process Host', function () {
   let configuration
   let output
   let exited = false
-  const TIMEOUT = process.env.TRAVIS ? 1000 : 500
+  let wroteFiles = false
+  const TIMEOUT = process.env.TRAVIS ? 2000 : 1000
   before(function (done) {
     output = new EchoStream()
     configuration = {
@@ -71,10 +72,21 @@ describe('Process Host', function () {
 
   it('should restart on command', function (done) {
     configuration.sets[2].value = 'oh look, a new MOTD'
-    processHost.restart(configuration, () => { exited = true })
-      .then(() => {
-        setTimeout(() => done(), TIMEOUT)
-      })
+    processHost.restart(
+      configuration,
+      () => {
+        wroteFiles = true
+        return Promise.resolve()
+      },
+      () => { exited = true }
+    )
+    .then(() => {
+      setTimeout(() => done(), TIMEOUT)
+    })
+  })
+
+  it('should have written files during restart', function () {
+    wroteFiles.should.equal(true)
   })
 
   it('should reflect a new MOTD after restart', function (done) {

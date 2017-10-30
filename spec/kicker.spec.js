@@ -37,6 +37,11 @@ const processHost = {
   stop: () => {}
 }
 
+const writer = {
+  hasFiles: () => {},
+  writeFiles: () => {}
+}
+
 const ORIGINAL_EXIT = process.exit
 
 function captureExit (fn) {
@@ -49,7 +54,7 @@ function releaseExit () {
 
 describe('Kicker', function () {
   describe('when successfully generating a bootstrap', function () {
-    let kicker, bootStrapMock, configMapperMock, etcdMock, configuration, log, args
+    let kicker, bootStrapMock, configMapperMock, etcdMock, writerMock, configuration, log, args
     before(function () {
       log = new Log()
       args = {
@@ -61,7 +66,8 @@ describe('Kicker', function () {
       bootStrapMock = sinon.mock(bootStrap)
       configMapperMock = sinon.mock(configMapper)
       etcdMock = sinon.mock(etcd)
-      kicker = new Kicker(bootStrap, configMapper, () => etcd, log, {})
+      writerMock = sinon.mock(writer)
+      kicker = new Kicker(bootStrap, configMapper, () => etcd, log, {}, writer)
       bootStrapMock
         .expects('generate')
         .withArgs(configuration)
@@ -74,6 +80,14 @@ describe('Kicker', function () {
         .expects('fetchConfig')
         .withArgs(configuration)
         .resolves({})
+      writerMock
+        .expects('hasFiles')
+        .withArgs(configuration)
+        .returns(true)
+      writerMock
+        .expects('writeFiles')
+        .withArgs(configuration)
+        .resolves(true)
       return kicker.kick(args)
     })
 
@@ -81,6 +95,7 @@ describe('Kicker', function () {
       bootStrapMock.verify()
       configMapperMock.verify()
       etcdMock.verify()
+      writerMock.verify()
     })
 
     it('should log progess', function () {
@@ -88,13 +103,14 @@ describe('Kicker', function () {
         'Fetching configuration from etcd for key space \'test\'',
         'Configuration (application state)',
         configuration,
+        'writing configuration files to disk',
         'bootstrap file generated successfully'
       ])
     })
   })
 
   describe('when successfully hosting process', function () {
-    let kicker, bootStrapMock, configMapperMock, etcdMock, processHostMock, configuration, log, args
+    let kicker, bootStrapMock, configMapperMock, etcdMock, processHostMock, writerMock, configuration, log, args
     before(function () {
       log = new Log()
       args = {
@@ -106,7 +122,8 @@ describe('Kicker', function () {
       configMapperMock = sinon.mock(configMapper)
       etcdMock = sinon.mock(etcd)
       processHostMock = sinon.mock(processHost)
-      kicker = new Kicker(bootStrap, configMapper, () => etcd, log, processHost)
+      writerMock = sinon.mock(writer)
+      kicker = new Kicker(bootStrap, configMapper, () => etcd, log, processHost, writer)
       configMapperMock
         .expects('load')
         .withArgs('./.kicker.toml')
@@ -122,6 +139,14 @@ describe('Kicker', function () {
         .expects('start')
         .withArgs(configuration, kicker.onExit)
         .resolves({})
+      writerMock
+        .expects('hasFiles')
+        .withArgs(configuration)
+        .returns(true)
+      writerMock
+        .expects('writeFiles')
+        .withArgs(configuration)
+        .resolves(true)
       return kicker.kick(args)
     })
 
@@ -130,6 +155,7 @@ describe('Kicker', function () {
       configMapperMock.verify()
       processHostMock.verify()
       etcdMock.verify()
+      writerMock.verify()
     })
 
     it('should log progess', function () {
@@ -137,6 +163,7 @@ describe('Kicker', function () {
         'Fetching configuration from etcd for key space \'test\'',
         'Configuration (application state)',
         configuration,
+        'writing configuration files to disk',
         'Starting service'
       ])
     })
@@ -165,10 +192,21 @@ describe('Kicker', function () {
     describe('when a change occurs - no lock required', function () {
       before(function () {
         log.reset()
+        writerMock.restore()
+        writerMock = sinon.mock(writer)
         processHostMock
           .expects('restart')
-          .withArgs(kicker.configuration, kicker.onExit)
+          .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
+          .callsArg(1)
           .resolves({})
+        writerMock
+          .expects('hasFiles')
+          .withArgs(configuration)
+          .returns(true)
+        writerMock
+          .expects('writeFiles')
+          .withArgs(configuration)
+          .resolves(true)
       })
 
       it('should restart process immediately', function () {
@@ -176,9 +214,11 @@ describe('Kicker', function () {
           .then(() => {
             log.entries.should.eql([
               'Change detected - waiting for 0.1 seconds before applying change',
-              'Configuration change detected on key \'nada\''
+              'Configuration change detected on key \'nada\'',
+              'writing configuration files to disk'
             ])
             processHostMock.verify()
+            writerMock.verify()
           })
       })
     })
@@ -224,6 +264,7 @@ describe('Kicker', function () {
         processHostMock.restore()
         lockMock.restore()
         etcdMock.restore()
+        writerMock.restore()
         delete kicker.configuration.lockRestart
       })
     })
@@ -236,6 +277,7 @@ describe('Kicker', function () {
         etcdMock = sinon.mock(etcd)
         processHostMock = sinon.mock(processHost)
         lockMock = sinon.mock(lock)
+        writerMock = sinon.mock(writer)
         lockMock
           .expects('lock')
           .resolves({})
@@ -248,8 +290,17 @@ describe('Kicker', function () {
           .returns(lock)
         processHostMock
           .expects('restart')
-          .withArgs(kicker.configuration, kicker.onExit)
+          .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
+          .callsArg(1)
           .resolves({})
+        writerMock
+          .expects('hasFiles')
+          .withArgs(configuration)
+          .returns(true)
+        writerMock
+          .expects('writeFiles')
+          .withArgs(configuration)
+          .resolves(true)
       })
 
       it('should restart process immediately', function () {
@@ -261,11 +312,13 @@ describe('Kicker', function () {
               'Acquiring restart lock',
               'Restart lock acquired successfully',
               'Configuration (application state)',
-              kicker.configuration
+              kicker.configuration,
+              'writing configuration files to disk'
             ])
             lockMock.verify()
             etcdMock.verify()
             processHostMock.verify()
+            writerMock.verify()
           })
       })
 

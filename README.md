@@ -12,15 +12,6 @@ Any sufficiently mature system I've worked on runs into a situation where the de
   * difficult to reason about / predict
   * don't solve for changes to values in various configuration sources
 
-## So Why Not Confd?
-
- * It's design is based around manging multiple services on a system
- * It errors when keys are missing from a back-end instead of falling back (as advertised)
- * It's watch-mode has serious CPU/Memory overhead problems which multiply when run per container
- * It appears to be abandonware :(
-
- For my use case, the first 3 generate a lot of additional work. I built a work around for the first, but the other two require me to maintain a separate fork of something that's not an ideal fit to begin with.
-
 ## What It Does
 
 kickerd is an attempt to address this by providing a CLI/daemon that will:
@@ -79,6 +70,9 @@ start = "node ./index.js"
 [argument]
   title = "TITLE"
   message-of-the-day = "MOTD"
+
+[file]
+  "/path/to/file" = "{{etcd-key}}"
 ```
 
  * When a key isn't available in the data source (etcd), then the environment variable's value will be used.
@@ -258,6 +252,15 @@ You'll need a local running instance of etcd. The `start-etcd.sh` script will ha
 
  * warn when no value was found for a key from etcd, environment or default
  * provide security (SSL, auth) options for etcd
+
+## So Why Not Confd?
+
+ * It's design is based around manging multiple services on a system
+ * It errors when keys are missing from a back-end instead of falling back (as advertised)
+ * It's watch-mode has serious CPU/Memory overhead problems which multiply when run per container
+ * It appears to be abandonware :(
+
+ For my use case, the first 3 generate a lot of additional work. I built a work around for the first, but the other two require me to maintain a separate fork of something that's not an ideal fit to begin with.
 
 [travis-url]: https://travis-ci.org/arobson/kickerd
 [travis-image]: https://travis-ci.org/arobson/kickerd.svg?branch=master

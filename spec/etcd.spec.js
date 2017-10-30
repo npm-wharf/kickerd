@@ -8,6 +8,7 @@ const ETCD_URL = 'http://localhost:2379'
 const PREFIX = 'development'
 const NAME = 'kickerd'
 const GROUP = 'replica'
+const FILE_CONTENT = `these are some\nfile contents\nlook at 'em!`
 
 function set (client, key, value) {
   return new Promise(function (resolve, reject) {
@@ -42,7 +43,8 @@ describe('Etcd', function () {
     { key: 'd', value: '4' },
     { key: 'e', value: '6' },
     { key: `d.${NAME}`, value: '5' },
-    { key: `e.${NAME}.${GROUP}`, value: 'hello' }
+    { key: `e.${NAME}.${GROUP}`, value: 'hello' },
+    { key: 'g', value: FILE_CONTENT }
   ]
   let config = initConfig({
     prefix: PREFIX,
@@ -53,7 +55,8 @@ describe('Etcd', function () {
       { key: 'b' },
       { key: 'c' },
       { key: 'd' },
-      { key: 'e' }
+      { key: 'e' },
+      { key: 'g' }
     ]
   })
   describe('when fetching initial keys', function () {
@@ -74,7 +77,8 @@ describe('Etcd', function () {
           b: [ , , '2' ],
           c: [ , , '3' ],
           d: [ , , '4', '5' ],
-          e: [ , , '6', , 'hello' ]
+          e: [ , , '6', , 'hello' ],
+          g: [ , , ]
         })
     })
 
@@ -192,6 +196,7 @@ describe('Etcd', function () {
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '5', type: 'number', level: 3 },
           { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'g', value: `these are some\nfile contents\nlook at 'em!`, type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
       })
@@ -221,6 +226,7 @@ describe('Etcd', function () {
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '4', type: 'number', level: 2 },
           { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'g', value: `these are some\nfile contents\nlook at 'em!`, type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
       })

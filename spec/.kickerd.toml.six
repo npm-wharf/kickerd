@@ -1,0 +1,17 @@
+name = "test-app-1"
+description = "test description 1"
+
+[environment]
+  TITLE = "{{site-title}}"
+  PORT = 8008
+
+[default]
+  TITLE = "Demo"
+
+[argument]
+  page-title = "TITLE"
+  host-port = "PORT"
+
+[file]
+  "/etc/nginx/htpasswd" = "{{nginx-password}}"
+  "spec/test.txt" = "{{test-file}}"

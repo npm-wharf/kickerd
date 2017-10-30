@@ -53,9 +53,24 @@ function load (configFile) {
     }
   }
 
+  for (let key in config.file) {
+    let value = config.file[ key ]
+    let definition = envs[ value ]
+    if (!definition) {
+      definition = {}
+      envs[ value ] = definition
+    }
+    definition.file = key
+    if (/^[{{].+[}}]$/.test(value)) {
+      definition.key = value.replace(/[}{]/g, '')
+    } else {
+      definition.key = value
+    }
+  }
+
   for (let key in envs) {
     const value = envs[ key ]
-    const definition = new Definition(key, value.default, value.key, value.argument)
+    const definition = new Definition(key, value.default, value.key, value.argument, value.file)
     hash.sets.push(definition)
   }
 

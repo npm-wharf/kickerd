@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.0"></a>
+# [1.4.0](https://github.com/arobson/kickerd/compare/v1.3.0...v1.4.0) (2017-10-30)
+
+
+### Features
+
+* add support for writing files from etcd keys ([bf0a11b](https://github.com/arobson/kickerd/commit/bf0a11b))
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/arobson/kickerd/compare/v1.2.2...v1.3.0) (2017-07-31)
 

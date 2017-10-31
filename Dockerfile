@@ -1,5 +1,5 @@
 # Set the base image to alpine Node LTS
-FROM node:6-alpine
+FROM node:8-alpine
 
 # File Author / Maintainer
 MAINTAINER Alex Robson <alexr@npmjs.com>

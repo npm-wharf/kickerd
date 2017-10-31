@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const toml = require('toml-j0.4')
 const packagePath = path.resolve(process.cwd(), './package.json')
-const servicePackage = require(packagePath)
+const servicePackage = fs.existsSync(packagePath) ? require(packagePath) : {}
 const Definition = require('./definition')
 
 function load (configFile) {

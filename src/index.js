@@ -5,6 +5,7 @@ const configMapper = require('./config-mapper')
 const etcdFn = require('./etcd')
 const processHost = require('./process-host')
 const Kicker = require('./kicker')
-const kicker = new Kicker(bootStrap, configMapper, etcdFn, log, processHost)
+const writer = require('./writer')
+const kicker = new Kicker(bootStrap, configMapper, etcdFn, log, processHost, writer)
 
 module.exports = kicker

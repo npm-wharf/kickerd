@@ -23,7 +23,7 @@ describe('Process Host', function () {
   let output
   let exited = false
   let wroteFiles = false
-  const TIMEOUT = process.env.TRAVIS ? 2000 : 1000
+  const TIMEOUT = process.env.TRAVIS ? 4000 : 1000
   before(function (done) {
     output = new EchoStream()
     configuration = {

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.1"></a>
+## [1.4.1](https://github.com/arobson/kickerd/compare/v1.4.0...v1.4.1) (2017-10-31)
+
+
+### Bug Fixes
+
+* upgrade to 8-alpine for baseline container to address vulnerability. remove assumption that package.json is always present from config-mapper. ([4cb0234](https://github.com/arobson/kickerd/commit/4cb0234))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/arobson/kickerd/compare/v1.3.0...v1.4.0) (2017-10-30)
 

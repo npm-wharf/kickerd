@@ -54,7 +54,7 @@ function applyKeys (config, keys) {
 
 function fetchConfig (client, config) {
   const get = Promise.promisify(client.get, {context: client})
-  return get(config.prefix)
+  return get(config.prefix, {recursive: true})
     .catch({ errorCode: 100 }, () => {
       // 'Key not found' error.
       return {node: {

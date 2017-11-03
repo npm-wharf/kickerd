@@ -10,3 +10,6 @@ start = "node ./index.js"
   TITLE = "Demo"
   PORT = 8008
   MOTD = "Ohhai, it's a thing"
+
+[file]
+  "./app.cfg" = "{{site-config}}"

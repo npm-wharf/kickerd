@@ -1,5 +1,6 @@
 {
   "development/site-title": "Kickerd Powered App",
   "development/site-port": 8008,
-  "development/site-motd": "This App Bootstrapped By Kickerd & Etcd"
+  "development/site-motd": "This App Bootstrapped By Kickerd & Etcd",
+  "development/site-config": "name: app\ndescription: 'a kickerd powered app'\nport: 8008\n"
 }

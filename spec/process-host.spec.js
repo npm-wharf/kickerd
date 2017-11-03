@@ -1,4 +1,5 @@
 require('./setup')
+const fs = require('fs')
 const stream = require('stream')
 const processHost = require('../src/process-host')
 const http = require('http')
@@ -37,6 +38,7 @@ describe('Process Host', function () {
         { env: 'GREETING_MESSAGE', value: 'hey, look, it\'s a message', argument: 'greeting-message' }
       ]
     }
+    fs.writeFileSync('./example/app/app.cfg', 'test file', 'utf8')
     processHost.start(configuration, () => { exited = true })
     configuration.process.stdout.pipe(output)
     setTimeout(() => done(), TIMEOUT)
@@ -49,7 +51,8 @@ describe('Process Host', function () {
   it('should log expected results to stdio', function () {
     output.content.should.eql([
       'Starting http at port 8018',
-      'this is a test of sorts'
+      'this is a test of sorts',
+      'test file'
     ])
   })
 
@@ -109,11 +112,16 @@ describe('Process Host', function () {
     output.content.should.eql([
       'Starting http at port 8018',
       'this is a test of sorts',
+      'test file',
       'shutting down'
     ])
   })
 
   it('should stop on command', function () {
     return processHost.stop(configuration)
+  })
+
+  after(function () {
+    fs.unlinkSync('./example/app/app.cfg')
   })
 })

@@ -1,3 +1,4 @@
+var fs = require('fs')
 var express = require('express')
 var app = express()
 var args = require('yargs')
@@ -37,3 +38,6 @@ process.on('SIGTERM', () => {
   console.log('shutting down')
   process.exit(0)
 })
+
+var cfg = fs.readFileSync('./app.cfg', 'utf8')
+console.log(cfg)

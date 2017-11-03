@@ -1,6 +1,6 @@
 {
   "name": "kickerd",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "source configuration from various inputs and kick the service when they change",
   "main": "./src/index.js",
   "bin": "./bin/kickerd.js",

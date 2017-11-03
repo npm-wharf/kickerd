@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.3"></a>
+## [1.4.3](https://github.com/arobson/kickerd/compare/v1.4.2...v1.4.3) (2017-11-03)
+
+
+### Bug Fixes
+
+* correct problem with async call to node-etcd that allowed for random / non-deterministic key/value pairs to return when requesting values from a keyspace. ([cc17ef5](https://github.com/arobson/kickerd/commit/cc17ef5))
+
+
+
 <a name="1.4.2"></a>
 ## [1.4.2](https://github.com/arobson/kickerd/compare/v1.4.1...v1.4.2) (2017-10-31)
 

@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arobson/kickerd.git"
+    "url": "git+https://github.com/npm-wharf/kickerd.git"
   },
   "keywords": [
     "configuration",
@@ -21,9 +21,9 @@
   "author": "Alex Robson",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/arobson/kickerd/issues"
+    "url": "https://github.com/npm-wharf/kickerd/issues"
   },
-  "homepage": "https://github.com/arobson/kickerd#readme",
+  "homepage": "https://github.com/npm-wharf/kickerd#readme",
   "devDependencies": {
     "chai": "^4.0.2",
     "chai-as-promised": "^7.0.0",

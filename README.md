@@ -262,7 +262,7 @@ You'll need a local running instance of etcd. The `start-etcd.sh` script will ha
 
  For my use case, the first 3 generate a lot of additional work. I built a work around for the first, but the other two require me to maintain a separate fork of something that's not an ideal fit to begin with.
 
-[travis-url]: https://travis-ci.org/arobson/kickerd
-[travis-image]: https://travis-ci.org/arobson/kickerd.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/arobson/kickerd?branch=master
-[coveralls-image]: https://coveralls.io/repos/github/arobson/kickerd/badge.svg?branch=master
+[travis-url]: https://travis-ci.org/npm-wharf/kickerd
+[travis-image]: https://travis-ci.org/npm-wharf/kickerd.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/npm-wharf/kickerd?branch=master
+[coveralls-image]: https://coveralls.io/repos/github/npm-wharf/kickerd/badge.svg?branch=master

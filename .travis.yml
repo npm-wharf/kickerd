@@ -16,10 +16,7 @@ before_script:
   - npm i @npm-wharf/shipwright@latest -g
 
 script:
-  # coveralls will _not_ stop rejecting this saying the repo doesn't exist
-  # no amount of rename/source redirect/sync attempts have fixed this
-  # - nyc npm test && nyc report --reporter=text-lcov | coveralls
-  - nyc npm test && nyc report --reporter=text-lcov
+  - nyc npm test && nyc report --reporter=text-lcov | coveralls
 
 after_script:
   - ./kill-etcd.sh

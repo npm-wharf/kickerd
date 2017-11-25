@@ -26,6 +26,7 @@ describe('Process Host', function () {
   let wroteFiles = false
   const TIMEOUT = process.env.TRAVIS ? 4000 : 1000
   before(function (done) {
+    this.timeout(10000)
     output = new EchoStream()
     configuration = {
       cwd: './example/app',
@@ -74,6 +75,7 @@ describe('Process Host', function () {
   })
 
   it('should restart on command', function (done) {
+    this.timeout(10000)
     configuration.sets[2].value = 'oh look, a new MOTD'
     processHost.restart(
       configuration,

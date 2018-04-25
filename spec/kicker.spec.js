@@ -358,7 +358,7 @@ describe('Kicker', function () {
         file: './.kicker.toml',
         bootstrap: true,
         prefix: 'dev',
-        etcd: 'http://localhost:2379'
+        etcd: 'http://localhost:12379'
       }
       configuration = {
       }
@@ -389,7 +389,7 @@ describe('Kicker', function () {
     it('should log failure', function () {
       log.entries.should.eql([
         'Fetching configuration from etcd for key space \'dev\'',
-        'Error retrieving keys for key space \'dev\' from etcd \'http://localhost:2379\': nope forever'
+        'Error retrieving keys for key space \'dev\' from etcd \'http://localhost:12379\': nope forever'
       ])
     })
 

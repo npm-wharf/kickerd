@@ -34,13 +34,17 @@ function writeFile (definition) {
     return ensurePath(dir, fullPath)
       .then(
         () => {
-          return fs.writeFile(fullPath, definition.value, 'utf8', (err) => {
-            if (err) {
-              reject(new Error(`Failed to write file '${fullPath}':\n\t${err.message}`))
-            } else {
-              resolve()
-            }
-          })
+          if (definition.value || !fs.existsSync(fullPath)) {
+            return fs.writeFile(fullPath, definition.value, 'utf8', (err) => {
+              if (err) {
+                reject(new Error(`Failed to write file '${fullPath}':\n\t${err.message}`))
+              } else {
+                resolve()
+              }
+            })
+          } else {
+            resolve()
+          }
         }
       )
   })

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-docker rm -f etcd
+docker rm -f kickerd-etcd

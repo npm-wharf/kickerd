@@ -4,7 +4,7 @@ require('./setup')
 const Etcd = require('node-etcd')
 const etcdFn = require('../src/etcd')
 const Definition = require('../src/definition')
-const ETCD_URL = 'http://localhost:2379'
+const ETCD_URL = 'http://localhost:12379'
 const PREFIX = 'development'
 const NAME = 'kickerd'
 const GROUP = 'replica'

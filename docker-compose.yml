@@ -1,10 +1,10 @@
 version: "3.3"
 services:
-  etcd:
+  kickerd-etcd:
     image: appcelerator/etcd:3.1.9
     ports:
-      - "2379:2379"
-      - "2380:2380"
+      - "12379:2379"
+      - "12380:2380"
   etcdeck:
     image: arobson/etcdeck:latest
     depends_on:
@@ -12,8 +12,8 @@ services:
     ports:
       - 8018:8018
     environment:
-      - ETCD=http://etcd:2379
-      - ETCD_URL=http://etcd:2379
+      - ETCD=http://kickerd-etcd:12379
+      - ETCD_URL=http://kickerd-etcd:12379
   app:
     build:
       context: ./

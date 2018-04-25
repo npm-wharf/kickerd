@@ -18,12 +18,12 @@ before_script:
 script:
   - nyc npm test && nyc report --reporter=text-lcov | coveralls
 
-after_script:
-  - ./kill-etcd.sh
-
 after_success:
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
   - shipwright build image --repo=npmwharf --name=kickerd --tags=lm,lt,v,miv,ma --cache-from-latest
+
+after_script:
+  - ./kill-etcd.sh
 
 node_js:
   - "6"

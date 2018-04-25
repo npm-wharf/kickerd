@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.4"></a>
+## [1.4.4](https://github.com/npm-wharf/kickerd/compare/v1.4.3...v1.4.4) (2018-04-25)
+
+
+### Bug Fixes
+
+* prevent overwriting files with empty etcd keys ([6f469d2](https://github.com/npm-wharf/kickerd/commit/6f469d2))
+
+
+
 <a name="1.4.3"></a>
 ## [1.4.3](https://github.com/arobson/kickerd/compare/v1.4.2...v1.4.3) (2017-11-03)
 

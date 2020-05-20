@@ -89,7 +89,7 @@ function start (configuration, onExit) {
 
 function stop (configuration) {
   if (configuration.process && !configuration.waiting) {
-    const deferred = {resolve: null, reject: null, promise: null}
+    const deferred = { resolve: null, reject: null, promise: null }
     configuration.waiting = deferred
     deferred.promise = new Promise((resolve) => {
       deferred.resolve = () => {

@@ -24,6 +24,7 @@ class Log {
   constructor () {
     this.entries = []
   }
+
   reset () { this.entries = [] }
   debug (x) { this.entries.push(x) }
   info (x) { this.entries.push(x) }

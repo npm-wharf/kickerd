@@ -29,9 +29,9 @@ class Kicker {
         this.writeFiles,
         this.onExit
       )
-      .then(() => {
-        this.deferredChange.resolve()
-      })
+        .then(() => {
+          this.deferredChange.resolve()
+        })
     }
   }
 
@@ -92,12 +92,12 @@ class Kicker {
       this.writeFiles,
       this.onExit
     )
-    .then(
-      () => {
-        this.deferredChange.resolve()
-        lock.unlock()
-      }
-    )
+      .then(
+        () => {
+          this.deferredChange.resolve()
+          lock.unlock()
+        }
+      )
   }
 
   onLockFailed (change, err) {

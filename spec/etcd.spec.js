@@ -8,7 +8,7 @@ const ETCD_URL = 'http://localhost:12379'
 const PREFIX = 'development'
 const NAME = 'kickerd'
 const GROUP = 'replica'
-const FILE_CONTENT = `these are some\nfile contents\nlook at 'em!`
+const FILE_CONTENT = 'these are some\nfile contents\nlook at \'em!'
 
 function set (client, key, value) {
   return new Promise(function (resolve, reject) {
@@ -36,7 +36,7 @@ function initConfig (hash) {
 describe('Etcd', function () {
   const client = new Etcd(ETCD_URL)
   let etcd
-  let keyList = [
+  const keyList = [
     { key: 'a', value: '1' },
     { key: 'b', value: '2' },
     { key: 'c', value: '3' },
@@ -46,7 +46,7 @@ describe('Etcd', function () {
     { key: `e.${NAME}.${GROUP}`, value: 'hello' },
     { key: 'g', value: FILE_CONTENT }
   ]
-  let config = initConfig({
+  const config = initConfig({
     prefix: PREFIX,
     group: GROUP,
     name: NAME,
@@ -61,7 +61,7 @@ describe('Etcd', function () {
   })
   describe('when fetching initial keys', function () {
     before(function () {
-      etcd = etcdFn({url: ETCD_URL})
+      etcd = etcdFn({ url: ETCD_URL })
       return setAll(client, keyList)
     })
 
@@ -73,12 +73,12 @@ describe('Etcd', function () {
     it('should fetch keys', function () {
       return etcd.fetchConfig(config)
         .should.eventually.partiallyEql({
-          a: [ , , '1' ],
-          b: [ , , '2' ],
-          c: [ , , '3' ],
-          d: [ , , '4', '5' ],
-          e: [ , , '6', , 'hello' ],
-          g: [ , , ]
+          a: [, , '1'],
+          b: [, , '2'],
+          c: [, , '3'],
+          d: [, , '4', '5'],
+          e: [, , '6', , 'hello'],
+          g: [, ,] // eslint-disable-line comma-spacing
         })
     })
 
@@ -99,7 +99,7 @@ describe('Etcd', function () {
           changed = x
           done()
         })
-        setTimeout(() => set(client, `a`, '1.5'), 50)
+        setTimeout(() => set(client, 'a', '1.5'), 50)
       })
 
       it('should pick up change', function () {
@@ -196,7 +196,7 @@ describe('Etcd', function () {
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '5', type: 'number', level: 3 },
           { key: 'e', value: 'hello', type: 'string', level: 4 },
-          { key: 'g', value: `these are some\nfile contents\nlook at 'em!`, type: 'string', level: 2 },
+          { key: 'g', value: 'these are some\nfile contents\nlook at \'em!', type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
       })
@@ -226,7 +226,7 @@ describe('Etcd', function () {
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '4', type: 'number', level: 2 },
           { key: 'e', value: 'hello', type: 'string', level: 4 },
-          { key: 'g', value: `these are some\nfile contents\nlook at 'em!`, type: 'string', level: 2 },
+          { key: 'g', value: 'these are some\nfile contents\nlook at \'em!', type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
       })
@@ -252,7 +252,7 @@ describe('Etcd', function () {
             return l1.unlock()
           }
         )
-        .then(() => done())
+          .then(() => done())
       })
     })
 

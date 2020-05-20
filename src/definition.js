@@ -3,7 +3,7 @@ class Definition {
     this.env = env
     this.values = Array(5)
     this.values[0] = defaultValue
-    this.values[1] = process.env[ env ]
+    this.values[1] = process.env[env]
     this.level = this.values[1] != null ? 1 : 0
     this.type = this.getType(defaultValue)
     this.key = key
@@ -32,14 +32,14 @@ class Definition {
   }
 
   clearValue (value, level) {
-    this.values[ level ] = null
-    while (--level > 0 && this.values[ level ] == null) {}
+    this.values[level] = null
+    while (--level > 0 && this.values[level] == null) {}
     this.level = level || 0
   }
 
   setValue (value, level) {
     this.type = this.getType(value)
-    this.values[ level ] = value
+    this.values[level] = value
     if (level > this.level) {
       this.level = level
     }

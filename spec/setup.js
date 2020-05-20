@@ -17,9 +17,9 @@ function deepCompare (a, b, k) {
     diffs.push('expected ' + k + ' to equal ' + a + ' but was undefined ')
   } else if (isObject(a) || Array.isArray(a)) {
     // _.each(a, function (v, c) {
-    for (let c in a) {
-      var key = k ? [ k, c ].join('.') : c
-      diffs = diffs.concat(deepCompare(a[ c ], b[ c ], key))
+    for (const c in a) {
+      var key = k ? [k, c].join('.') : c
+      diffs = diffs.concat(deepCompare(a[c], b[c], key))
     }
   } else {
     var equal = a == b // eslint-disable-line eqeqeq
@@ -39,8 +39,8 @@ chai.Assertion.addMethod('partiallyEql', function (partial) {
   return obj.then(function (actual) {
     var diffs = deepCompare(partial, actual)
     return self.assert(
-    diffs.length === 0,
-    diffs.join('\n\t')
+      diffs.length === 0,
+      diffs.join('\n\t')
     )
   })
 })

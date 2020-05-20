@@ -53,13 +53,15 @@ function applyKeys (config, keys) {
 }
 
 function fetchConfig (client, config) {
-  const get = Promise.promisify(client.get, {context: client})
-  return get(config.prefix, {recursive: true})
+  const get = Promise.promisify(client.get, { context: client })
+  return get(config.prefix, { recursive: true })
     .catch({ errorCode: 100 }, () => {
       // 'Key not found' error.
-      return {node: {
-        nodes: []
-      }}
+      return {
+        node: {
+          nodes: []
+        }
+      }
     })
     .then((response) => {
       return response.node.nodes.reduce((acc, node) => {
@@ -108,7 +110,7 @@ function toEnvKey (key) {
 }
 
 function watch (client, config, onChange) {
-  const watcher = client.watcher(config.prefix, null, {recursive: true})
+  const watcher = client.watcher(config.prefix, null, { recursive: true })
   log.info(`Watching for changes in keyspace ${config.prefix}`)
   watcher.on('change', (change) => {
     if (applyChange(config, change) === false) {

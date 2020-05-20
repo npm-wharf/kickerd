@@ -62,7 +62,7 @@ describe('Process Host', function () {
       path: '/custom-greeting',
       port: 8018
     }, (res) => {
-      let raw = []
+      const raw = []
       res.on('data', chunk => {
         raw.push(chunk.toString())
       })
@@ -85,9 +85,9 @@ describe('Process Host', function () {
       },
       () => { exited = true }
     )
-    .then(() => {
-      setTimeout(() => done(), TIMEOUT)
-    })
+      .then(() => {
+        setTimeout(() => done(), TIMEOUT)
+      })
   })
 
   it('should have written files during restart', function () {
@@ -98,7 +98,7 @@ describe('Process Host', function () {
     http.request({
       port: 8018
     }, (res) => {
-      let raw = []
+      const raw = []
       res.on('data', chunk => {
         raw.push(chunk.toString())
       })

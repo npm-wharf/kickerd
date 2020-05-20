@@ -26,8 +26,8 @@ function load (configFile) {
   // Definition. Multi passes are ok,
   // config sets aren't unbounded and this is
   // on start-up.
-  for (let key in config.environment) {
-    const value = config.environment[ key ]
+  for (const key in config.environment) {
+    const value = config.environment[key]
     const definition = {}
     if (/^[{{].+[}}]$/.test(value)) {
       definition.key = value.replace(/[}{]/g, '')
@@ -40,12 +40,12 @@ function load (configFile) {
     envs[key] = definition
   }
 
-  for (let key in config.argument) {
-    let value = config.argument[ key ]
-    let definition = envs[ value ]
+  for (const key in config.argument) {
+    const value = config.argument[key]
+    let definition = envs[value]
     if (!definition) {
       definition = {}
-      envs[ value ] = definition
+      envs[value] = definition
     }
     definition.argument = key
     if (!definition.default && config.default && config.default[value]) {
@@ -53,12 +53,12 @@ function load (configFile) {
     }
   }
 
-  for (let key in config.file) {
-    let value = config.file[ key ]
-    let definition = envs[ value ]
+  for (const key in config.file) {
+    const value = config.file[key]
+    let definition = envs[value]
     if (!definition) {
       definition = {}
-      envs[ value ] = definition
+      envs[value] = definition
     }
     definition.file = key
     if (/^[{{].+[}}]$/.test(value)) {
@@ -68,8 +68,8 @@ function load (configFile) {
     }
   }
 
-  for (let key in envs) {
-    const value = envs[ key ]
+  for (const key in envs) {
+    const value = envs[key]
     const definition = new Definition(key, value.default, value.key, value.argument, value.file)
     hash.sets.push(definition)
   }

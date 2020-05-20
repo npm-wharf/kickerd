@@ -26,6 +26,5 @@ after_script:
   - ./kill-etcd.sh
 
 node_js:
-  - "6"
   - "8"
   - "12"

@@ -1,3 +1,4 @@
+const assert = require('assert')
 const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
@@ -26,7 +27,8 @@ function applyChange (config, change) {
       if (level >= definition.level) {
         if (change.action === 'set') {
           definition.setValue(value, level)
-        } else if (change.action === 'delete') {
+        } else {
+          assert(change.action === 'delete')
           definition.clearValue(level)
         }
         changed = true
@@ -133,6 +135,7 @@ module.exports = function (options = { url: DEFAULT_URL }) {
   return {
     fetchConfig: fetchConfig.bind(null, client),
     lockRestart: lockRestart.bind(null, client),
-    watch: watch.bind(null, client)
+    watch: watch.bind(null, client),
+    clientUrl: options.url
   }
 }

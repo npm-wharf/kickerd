@@ -33,7 +33,13 @@ function initConfig (hash) {
   return hash
 }
 
+// NOTE: These tests cannot be run in isolation
 describe('Etcd', function () {
+  describe('with default URL', function () {
+    const defaultFn = etcdFn()
+    defaultFn.clientUrl.should.eql('http://localhost:2379')
+  })
+
   const client = new Etcd(ETCD_URL)
   let etcd
   const keyList = [
@@ -92,6 +98,29 @@ describe('Etcd', function () {
       ])
     })
 
+    describe('when pushing keys which weren\'t initialised', function () {
+      before(function () {
+        etcd = etcdFn({ url: ETCD_URL })
+        config.sets.push({ key: 'h', value: 'Is this added?', type: 'string', level: 3 })
+      })
+
+      it('should not add those keys', function () {
+        return etcd.fetchConfig(config)
+          .should.eventually.partiallyEql({
+            a: [, , '1'],
+            b: [, , '2'],
+            c: [, , '3'],
+            d: [, , '4', '5'],
+            e: [, , '6', , 'hello'],
+            g: [, ,] // eslint-disable-line comma-spacing
+          })
+      })
+
+      after(function () {
+        config.sets.pop()
+      })
+    })
+
     describe('when watched key changes at same level of specificity', function () {
       let changed
       before(function (done) {
@@ -120,6 +149,34 @@ describe('Etcd', function () {
       })
     })
 
+    describe('when watched key changes at group level', function () {
+      let changed
+      before(function (done) {
+        etcd.watch(config, (x) => {
+          changed = x
+          done()
+        })
+        setTimeout(() => set(client, `e.${NAME}.${GROUP}`, 'goodbye'), 50)
+      })
+
+      it('should pick up change', function () {
+        changed.action.should.eql('set')
+        changed.node.key.should.eql(`/${PREFIX}/e.${NAME}.${GROUP}`)
+        changed.node.value.should.eql('goodbye')
+        return config.sets.should.partiallyEql([
+          { key: 'a', value: '1.5', type: 'number', level: 2 },
+          { key: 'b', value: '2', type: 'number', level: 2 },
+          { key: 'c', value: '3', type: 'number', level: 2 },
+          { key: 'd', value: '5', type: 'number', level: 3 },
+          { key: 'e', value: 'goodbye', type: 'string', level: 4 }
+        ])
+      })
+
+      after(function () {
+        config.watcher.stop()
+      })
+    })
+
     describe('when watched key changes', function () {
       let changed
       before(function (done) {
@@ -139,7 +196,7 @@ describe('Etcd', function () {
           { key: 'b', value: '2', type: 'number', level: 2 },
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '5', type: 'number', level: 3 },
-          { key: 'e', value: 'hello', type: 'string', level: 4 }
+          { key: 'e', value: 'goodbye', type: 'string', level: 4 }
         ])
       })
 
@@ -167,7 +224,7 @@ describe('Etcd', function () {
           { key: 'b', value: '2', type: 'number', level: 2 },
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '5', type: 'number', level: 3 },
-          { key: 'e', value: 'hello', type: 'string', level: 4 }
+          { key: 'e', value: 'goodbye', type: 'string', level: 4 }
         ])
       })
 
@@ -195,7 +252,7 @@ describe('Etcd', function () {
           { key: 'b', value: '2', type: 'number', level: 2 },
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '5', type: 'number', level: 3 },
-          { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'e', value: 'goodbye', type: 'string', level: 4 },
           { key: 'g', value: 'these are some\nfile contents\nlook at \'em!', type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
@@ -225,7 +282,7 @@ describe('Etcd', function () {
           { key: 'b', value: '2', type: 'number', level: 2 },
           { key: 'c', value: '3', type: 'number', level: 2 },
           { key: 'd', value: '4', type: 'number', level: 2 },
-          { key: 'e', value: 'hello', type: 'string', level: 4 },
+          { key: 'e', value: 'goodbye', type: 'string', level: 4 },
           { key: 'g', value: 'these are some\nfile contents\nlook at \'em!', type: 'string', level: 2 },
           { key: 'f', value: '6', type: 'number', level: 2 }
         ])
@@ -233,6 +290,24 @@ describe('Etcd', function () {
 
       after(function () {
         config.watcher.stop()
+      })
+    })
+
+    describe('when name is wrong', function () {
+      before(function () {
+        return set(client, 'e.nameincorrect', 'Undefined name')
+      })
+
+      it('should not override existing key', function () {
+        return etcd.fetchConfig(config)
+          .should.eventually.partiallyEql({
+            a: [, , '1.5'],
+            b: [, , '2'],
+            c: [, , '3'],
+            d: [, , '4'],
+            e: [, , '6', , 'goodbye'],
+            g: [, ,] // eslint-disable-line comma-spacing
+          })
       })
     })
 

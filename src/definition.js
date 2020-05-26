@@ -31,10 +31,10 @@ class Definition {
     return type
   }
 
-  clearValue (value, level) {
+  clearValue (level) {
     this.values[level] = null
     while (--level > 0 && this.values[level] == null) {}
-    this.level = level || 0
+    this.level = level
   }
 
   setValue (value, level) {

@@ -1,4 +1,5 @@
 require('./setup')
+const chai = require('chai')
 const fs = require('fs')
 const path = require('path')
 const rimraf = require('rimraf')
@@ -10,9 +11,8 @@ const FLAT_PATH = './spec/test-files/flat/test.txt'
 const PASS_PATH = './spec/test-files/password/htpasswd'
 
 describe('Writer', function () {
-  let configuration
-  before(function () {
-    configuration = {
+  it('should write files in configuration sets', function () {
+    const configuration = {
       sets: [
         {},
         { file: PASS_PATH, value: HTPASSWD },
@@ -21,14 +21,46 @@ describe('Writer', function () {
         {}
       ]
     }
-    return writer.writeFiles(configuration)
+
+    writer.writeFiles(configuration).then(() => {
+      const writtenPass = fs.readFileSync(path.resolve(PASS_PATH), 'utf8')
+      const writtenText = fs.readFileSync(path.resolve(FLAT_PATH), 'utf8')
+      writtenPass.should.equal(HTPASSWD)
+      writtenText.should.equal(TEST_TXT)
+    })
   })
 
-  it('should write files in configuration sets', function () {
-    const writtenPass = fs.readFileSync(path.resolve(PASS_PATH), 'utf8')
-    const writtenText = fs.readFileSync(path.resolve(FLAT_PATH), 'utf8')
-    writtenPass.should.equal(HTPASSWD)
-    writtenText.should.equal(TEST_TXT)
+  // it('should skip mkdirp call if dir exists', async () => {
+  //   const configuration = {
+  //     sets: [
+  //       {},
+  //       { file: '/sys/impossible.txt', value: '' }
+  //     ]
+  //   }
+
+  //   return new Promise((resolve, reject) => {
+  //     writer.writeFiles(configuration).then(
+  //       () => reject(new Error('Expected file writing to fail but it was successful')))
+  //       .catch((err) => {
+  //         if (err.message.startsWith('Failed to write file')) {
+  //           resolve()
+  //         } else {
+  //           reject(new Error('Unexpected error raised by `writeFiles`'))
+  //         }
+  //       })
+  //   })
+  // })
+
+  it('should report failure if mkdirp fails', () => {
+    const configuration = {
+      sets: [
+        {},
+        { file: '/sys/fail/can', value: '' }
+      ]
+    }
+
+    return chai.expect(writer.writeFiles(configuration))
+      .to.eventually.be.rejectedWith('Failed to create path \'/sys/fail\' for configuration file \'/sys/fail/can\'')
   })
 
   after(function (done) {

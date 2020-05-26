@@ -13,7 +13,13 @@ function applyChange (config, change) {
   let changed = false
   const [key, name, group] = getKey(config.prefix, change.node.key)
   const value = change.node.value
-  const level = group ? 4 : (name ? 3 : 2)
+  let level = 2
+  if (group) {
+    level = 4
+  } else if (name) {
+    level = 3
+  }
+
   config.sets.forEach(definition => {
     if (definition.key === key) {
       match = true
@@ -21,7 +27,7 @@ function applyChange (config, change) {
         if (change.action === 'set') {
           definition.setValue(value, level)
         } else if (change.action === 'delete') {
-          definition.clearValue(value, level)
+          definition.clearValue(level)
         }
         changed = true
       }

@@ -1,0 +1,62 @@
+{
+  "name": "kickerd",
+  "version": "2.0.0",
+  "description": "source configuration from various inputs and kick the service when they change",
+  "main": "./src/index.js",
+  "bin": "./bin/kickerd.js",
+  "scripts": {
+    "pretest": "standard",
+    "test": "node_modules/mocha/bin/mocha ./spec/*.spec.js",
+    "coverage": "nyc npm test",
+    "release": "standard-version",
+    "start": "my start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/npm-wharf/kickerd.git"
+  },
+  "keywords": [
+    "configuration",
+    "etcd"
+  ],
+  "author": "Alex Robson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/npm-wharf/kickerd/issues"
+  },
+  "homepage": "https://github.com/npm-wharf/kickerd#readme",
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-as-promised": "^7.0.0",
+    "coveralls": "^3.1.0",
+    "mocha": "^7.1.2",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^15.0.1",
+    "rimraf": "^3.0.2",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0",
+    "standard": "^14.3.4",
+    "standard-version": "^8.0.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "bole": "^4.0.0",
+    "etcd-lock": "^1.1.0",
+    "mkdirp": "^1.0.4",
+    "node-etcd": "^7.0.0",
+    "nunjucks": "^3.0.1",
+    "read-pkg-up": "^7.0.1",
+    "renv": "^2.0.0",
+    "shell-quote": "^1.6.1",
+    "toml-j0.4": "^1.0.10",
+    "yargs": "^15.3.1"
+  },
+  "standard": {
+    "env": [
+      "mocha"
+    ],
+    "globals": [
+      "sinon"
+    ]
+  }
+}

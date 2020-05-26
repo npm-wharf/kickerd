@@ -1,11 +1,11 @@
 const fs = require('fs')
 const path = require('path')
 const toml = require('toml-j0.4')
-const packagePath = path.resolve(process.cwd(), './package.json')
-const servicePackage = fs.existsSync(packagePath) ? require(packagePath) : {}
 const Definition = require('./definition')
 
 function load (configFile) {
+  const packagePath = path.resolve(process.cwd(), './package.json')
+  const servicePackage = fs.existsSync(packagePath) ? require(packagePath) : {}
   const fullPath = path.resolve(configFile)
   const raw = fs.readFileSync(fullPath, 'utf8')
   const config = toml.parse(raw)
@@ -37,6 +37,7 @@ function load (configFile) {
     if (config.default && config.default[key]) {
       definition.default = config.default[key]
     }
+
     envs[key] = definition
   }
 
@@ -55,11 +56,8 @@ function load (configFile) {
 
   for (const key in config.file) {
     const value = config.file[key]
-    let definition = envs[value]
-    if (!definition) {
-      definition = {}
-      envs[value] = definition
-    }
+    const definition = {}
+    envs[value] = definition
     definition.file = key
     if (/^[{{].+[}}]$/.test(value)) {
       definition.key = value.replace(/[}{]/g, '')

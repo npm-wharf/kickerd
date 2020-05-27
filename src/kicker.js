@@ -102,10 +102,11 @@ class Kicker {
 
   onLockFailed (change, err) {
     const retry = this.configuration.lockTTL || RETRY_TIMEOUT
-    this.log.error(`Failed to acquire lock, trying again in ${retry} seconds : ${err.message}`)
     if (this.configuration.dontRetry !== true) {
+      this.log.error(`Failed to acquire lock, trying again in ${retry} seconds : ${err.message}`)
       setTimeout(() => this.configurationChanged(change), retry * 1000)
     } else {
+      this.log.error(`Failed to acquire lock, dontRetry is set to 'true', not retrying : ${err.message}`)
       this.deferredChange.reject(err)
     }
   }

@@ -4,3 +4,4 @@ node_modules/
 package-lock.json
 app.cfg
 .DS_STORE
+report*.json

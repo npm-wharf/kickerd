@@ -30,26 +30,22 @@ describe('Writer', function () {
     })
   })
 
-  // it('should skip mkdirp call if dir exists', async () => {
-  //   const configuration = {
-  //     sets: [
-  //       {},
-  //       { file: '/sys/impossible.txt', value: '' }
-  //     ]
-  //   }
+  it('should skip mkdirp call if dir exists', async () => {
+    const configuration = {
+      sets: [
+        {},
+        { file: path.resolve('./spec/existing-dir.txt'), value: '' }
+      ]
+    }
 
-  //   return new Promise((resolve, reject) => {
-  //     writer.writeFiles(configuration).then(
-  //       () => reject(new Error('Expected file writing to fail but it was successful')))
-  //       .catch((err) => {
-  //         if (err.message.startsWith('Failed to write file')) {
-  //           resolve()
-  //         } else {
-  //           reject(new Error('Unexpected error raised by `writeFiles`'))
-  //         }
-  //       })
-  //   })
-  // })
+    return new Promise((resolve, reject) => {
+      writer.writeFiles(configuration).then(
+        () => resolve())
+        .catch((err) => {
+          reject(new Error(`Unexpected error raised by 'writeFiles': ${err}`))
+        })
+    })
+  })
 
   it('should report failure if mkdirp fails', () => {
     const configuration = {
@@ -63,7 +59,42 @@ describe('Writer', function () {
       .to.eventually.be.rejectedWith('Failed to create path \'/sys/fail\' for configuration file \'/sys/fail/can\'')
   })
 
+  it('should just resolve if file exists', () => {
+    sinon.restore()
+    const fsStub = sinon.stub(fs, 'existsSync')
+    fsStub.returns(true)
+    const configuration = {
+      sets: [
+        {},
+        { file: '/sys/impossible.txt', value: '' }
+      ]
+    }
+
+    return chai.expect(writer.writeFiles(configuration))
+      .to.eventually.be.fulfilled
+  })
+
+  it('should fail if file write fails', () => {
+    sinon.restore()
+    const fsExistsStub = sinon.stub(fs, 'existsSync')
+    fsExistsStub.onFirstCall()
+      .returns(true)
+      .onSecondCall()
+      .returns(false)
+    const configuration = {
+      sets: [
+        {},
+        { file: '/sys/impossible.txt', value: '' }
+      ]
+    }
+
+    return chai.expect(writer.writeFiles(configuration))
+      .to.eventually.be.rejectedWith('Failed to write file \'/sys/impossible.txt\':\n\tENOENT: no such file or directory, open \'/sys/impossible.txt\'')
+  })
+
   after(function (done) {
+    fs.unlinkSync('./spec/existing-dir.txt')
+
     rimraf('./spec/test-files', (err) => {
       if (err) {
         console.log('Writer Spec - file system cleanup failed')

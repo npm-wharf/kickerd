@@ -33,8 +33,9 @@ describe('Process Host', function () {
       start: 'node index.js',
       sets: [
         { env: 'TITLE', value: 'http' },
-        { env: 'PORT', value: 8018 },
+        { env: 'PORT', value: 8018, type: 'number' },
         { env: 'MOTD', value: 'this is a test of sorts' },
+        { env: 'UINDEFINED' },
         { env: 'GREETING_ROUTE', value: '/custom-greeting', argument: 'greeting-route' },
         { env: 'GREETING_MESSAGE', value: 'hey, look, it\'s a message', argument: 'greeting-message' }
       ]

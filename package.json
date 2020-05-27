@@ -10,6 +10,10 @@
     "coverage": "nyc npm test",
     "release": "standard-version"
   },
+  "nyc": {
+    "include": "src",
+    "exclude": "**/*.spec.js" 
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/npm-wharf/kickerd.git"

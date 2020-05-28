@@ -25,8 +25,8 @@ describe('Process Host', function () {
   let exited = false
   let wroteFiles = false
   const TIMEOUT = process.env.TRAVIS ? 4000 : 1000
-  before(function (done) {
-    this.timeout(10000)
+
+  function startProcess (done) {
     output = new EchoStream()
     configuration = {
       cwd: './example/app',
@@ -44,6 +44,15 @@ describe('Process Host', function () {
     processHost.start(configuration, () => { exited = true })
     configuration.process.stdout.pipe(output)
     setTimeout(() => done(), TIMEOUT)
+  }
+
+  // function restartProcess (done) {
+
+  // }
+
+  before(function (done) {
+    this.timeout(10000)
+    startProcess(done)
   })
 
   it('should not exit unexpectedly', function () {
@@ -123,6 +132,31 @@ describe('Process Host', function () {
   it('should stop on command', function () {
     return processHost.stop(configuration)
   })
+
+  // describe('failure cases', function () {
+  //   before(function (done) {
+  //     this.timeout(10000)
+  //     startProcess(done)
+  //   })
+
+  //   it('should defer to waiting promise on stop', function () {
+  //     const injectedPromise = new Promise(function (resolve) {
+  //       resolve('We resolved!')
+  //     })
+  //     configuration.waiting = { promise: injectedPromise }
+  //     const stopPromise = processHost.stop(configuration)
+  //     return stopPromise.should.eventually.eql('We resolved!')
+  //   })
+
+  //   it('should run onExit() if the child process dies unexpectedly', function (done) {
+  //     restartProcess(done)
+  //     configuration.process.exit(0)
+  //   })
+
+  //   after(function () {
+  //     processHost.stop(configuration)
+  //   })
+  // })
 
   after(function () {
     fs.unlinkSync('./example/app/app.cfg')

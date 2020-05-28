@@ -1,7 +1,10 @@
 require('./setup')
 const chai = require('chai')
+const path = require('path')
 const sinon = require('sinon')
 chai.use(require('sinon-chai'))
+const FILENAME = 'bootstrap.sh'
+const FILEPATH = path.resolve(process.cwd(), FILENAME)
 
 const bootStrap = require('../src/bootstrap-template')
 const fs = require('fs')
@@ -34,6 +37,6 @@ describe('Bootstrap Template', function () {
     bootStrap.generate(context)
 
     sinon.restore()
-    chai.expect(consoleSpy).to.have.been.calledWith('Failed to write /Users/owenniblock/git/npm/kickerd/bootstrap.sh: I stubbed my toe')
+    chai.expect(consoleSpy).to.have.been.calledWithMatch(`Failed to write ${FILEPATH}: I stubbed my toe`)
   })
 })

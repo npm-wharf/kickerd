@@ -300,7 +300,7 @@ describe('Kicker', function () {
       })
 
       it('should not restart the process', function () {
-        return kicker.wairt({ node: { key: 'nada' } })
+        return kicker.wait({ node: { key: 'nada' } })
           .then(
             null,
             () => {

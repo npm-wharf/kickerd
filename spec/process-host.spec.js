@@ -46,10 +46,6 @@ describe('Process Host', function () {
     setTimeout(() => done(), TIMEOUT)
   }
 
-  // function restartProcess (done) {
-
-  // }
-
   before(function (done) {
     this.timeout(10000)
     startProcess(done)
@@ -133,30 +129,37 @@ describe('Process Host', function () {
     return processHost.stop(configuration)
   })
 
-  // describe('failure cases', function () {
-  //   before(function (done) {
-  //     this.timeout(10000)
-  //     startProcess(done)
-  //   })
+  describe('failure cases', function () {
+    beforeEach(function (done) {
+      this.timeout(10000)
+      startProcess(done)
+    })
 
-  //   it('should defer to waiting promise on stop', function () {
-  //     const injectedPromise = new Promise(function (resolve) {
-  //       resolve('We resolved!')
-  //     })
-  //     configuration.waiting = { promise: injectedPromise }
-  //     const stopPromise = processHost.stop(configuration)
-  //     return stopPromise.should.eventually.eql('We resolved!')
-  //   })
+    it('should run onExit() if the child process exits outside stop command', function () {
+      delete configuration.waiting
+      configuration.process.emit('close')
+      exited.should.eql(true)
+    })
 
-  //   it('should run onExit() if the child process dies unexpectedly', function (done) {
-  //     restartProcess(done)
-  //     configuration.process.exit(0)
-  //   })
+    it('should run onError() if the child process raises an error', function () {
+      sinon.stub(process, 'exit')
+      configuration.process.emit('error', new Error('Oh no!'))
+      sinon.assert.calledWith(process.exit, 100)
+    })
 
-  //   after(function () {
-  //     processHost.stop(configuration)
-  //   })
-  // })
+    it('should return waiting promise if already set', function () {
+      const output = processHost.stop({
+        process: 'fake',
+        waiting: { promise: 'should be returned' }
+      })
+      output.should.be.eql('should be returned')
+    })
+
+    afterEach(function () {
+      sinon.restore()
+      processHost.stop(configuration)
+    })
+  })
 
   after(function () {
     fs.unlinkSync('./example/app/app.cfg')

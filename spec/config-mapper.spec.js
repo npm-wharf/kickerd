@@ -14,12 +14,12 @@ describe('Config Mapper', function () {
   let hashFive
   let hashSix
   before(function () {
-    hashOne = configMapper.load('./spec/.kickerd.toml.one')
-    hashTwo = configMapper.load('./spec/.kickerd.toml.two')
-    hashThree = configMapper.load('./spec/configuration.tmpl.three')
-    hashFour = configMapper.load('./spec/.kickerd.toml.three')
-    hashFive = configMapper.load('./spec/.kickerd.toml.four')
-    hashSix = configMapper.load('./spec/.kickerd.toml.six')
+    hashOne = configMapper.load('./spec/assets/kickerd.toml.one')
+    hashTwo = configMapper.load('./spec/assets/kickerd.toml.two')
+    hashThree = configMapper.load('./spec/assets/configuration.tmpl.three')
+    hashFour = configMapper.load('./spec/assets/kickerd.toml.three')
+    hashFive = configMapper.load('./spec/assets/kickerd.toml.four')
+    hashSix = configMapper.load('./spec/assets/kickerd.toml.six')
   })
 
   it('should backfill start using main property when start property and start script is missing', function () {
@@ -120,7 +120,7 @@ describe('Config Mapper', function () {
   it('should handle missing packagePath by not adding start', function () {
     sinon.stub(fs, 'existsSync').returns(false)
 
-    const noPackagePath = configMapper.load('./spec/.kickerd.toml.one')
+    const noPackagePath = configMapper.load('./spec/assets/kickerd.toml.one')
 
     return noPackagePath.should.partiallyEql({
       name: 'test-app-1',
@@ -135,11 +135,11 @@ describe('Config Mapper', function () {
   })
 
   it('should get start from package.json if available', function () {
-    const replacementPackagePath = path.resolve(process.cwd(), './spec/.packageWithStart.json')
+    const replacementPackagePath = path.resolve(process.cwd(), './spec/assets/packageWithStart.json')
     const stubPathResolve = sinon.stub(path, 'resolve')
     stubPathResolve.onCall(0).returns(replacementPackagePath).callThrough()
 
-    const noPackagePath = configMapper.load('./spec/.kickerd.toml.one')
+    const noPackagePath = configMapper.load('./spec/assets/kickerd.toml.one')
 
     return noPackagePath.should.partiallyEql({
       name: 'test-app-1',
@@ -157,7 +157,7 @@ describe('Config Mapper', function () {
   it('should override defaults with process.env', function () {
     process.env.TITLE = 'From Env'
 
-    const hashOneWithEnv = configMapper.load('./spec/.kickerd.toml.one')
+    const hashOneWithEnv = configMapper.load('./spec/assets/kickerd.toml.one')
 
     return hashOneWithEnv.should.partiallyEql({
       name: 'test-app-1',

@@ -280,7 +280,7 @@ describe('Kicker', function () {
       })
     })
 
-    describe('when a change occurs - lock acquisition fails', function () {
+    describe('when a change occurs and lock acquisition fails when retry is disabled', function () {
       let lockMock
       before(function () {
         kicker.configuration.lockRestart = true
@@ -299,8 +299,8 @@ describe('Kicker', function () {
           .never()
       })
 
-      it('should restart process immediately', function () {
-        return kicker.wait({ node: { key: 'nada' } })
+      it('should not restart the process', function () {
+        return kicker.wairt({ node: { key: 'nada' } })
           .then(
             null,
             () => {
@@ -328,7 +328,7 @@ describe('Kicker', function () {
 
     // NOTE: If the lock fails consistently and lockRestart = true
     // retry loops recursively for ever.
-    describe('when a change occurs - lock acquisition fails and retry is enabled', function () {
+    describe('when a change occurs and lock acquisition fails when retry is enabled', function () {
       let lockStub
       before(function () {
         kicker.configuration.lockRestart = true
@@ -355,7 +355,7 @@ describe('Kicker', function () {
           .resolves({})
       })
 
-      it('should not restart process immediately', function () {
+      it('should retry and then restart the process', function () {
         return kicker.wait({ node: { key: 'nada' } })
           .then(
             null,

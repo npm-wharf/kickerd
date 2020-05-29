@@ -129,6 +129,8 @@ describe('Process Host', function () {
     return processHost.stop(configuration)
   })
 
+  // Starting the processHost each time is costly
+  // we may be able to speed this up by mocking out more here.
   describe('failure cases', function () {
     beforeEach(function (done) {
       this.timeout(10000)

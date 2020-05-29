@@ -319,15 +319,14 @@ describe('Etcd', function () {
         delete config.lock
       })
 
-      it('should create and store a lock with custom TTL', function (done) {
+      it('should create and store and lock with custom TTL', function (done) {
         config.lockTtl = 1
         const l1 = etcd.lockRestart(config)
         l1.lock().then(
           () => {
             return l1.unlock()
           }
-        )
-          .then(() => done())
+        ).then(() => done())
       })
     })
 

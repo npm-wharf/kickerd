@@ -8,9 +8,9 @@ const SIGINT = 'SIGINT'
 function addSignalHandler (configuration) {
   if (!configuration.signalsHandled) {
     configuration.signalsHandled = true
-    process.on(SIGTERM, onShutdown.bind(null, configuration, 0))
-    process.on(SIGINT, onShutdown.bind(null, configuration, 0))
-    process.on('exit', onShutdown.bind(null, configuration, 0))
+    process.on(SIGTERM, onShutdown.bind(null, configuration))
+    process.on(SIGINT, onShutdown.bind(null, configuration))
+    process.on('exit', onShutdown.bind(null, configuration))
   }
 }
 

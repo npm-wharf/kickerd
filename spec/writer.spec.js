@@ -77,10 +77,12 @@ describe('Writer', function () {
   it('should fail if file write fails', () => {
     sinon.restore()
     const fsExistsStub = sinon.stub(fs, 'existsSync')
+    const fsWriteStub = sinon.stub(fs, 'writeFile')
     fsExistsStub.onFirstCall()
       .returns(true)
       .onSecondCall()
       .returns(false)
+    fsWriteStub.yields(new Error('ENOENT: no such file or directory, open \'/sys/impossible.txt\''))
     const configuration = {
       sets: [
         {},

@@ -14,11 +14,9 @@ function hasFiles (configuration) {
 function ensurePath (dir, fullPath) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dir)) {
-      mkdirp(dir).then(
-        () => { resolve() },
-        (err) => {
-          reject(new Error(`Failed to create path '${dir}' for configuration file '${fullPath}':\n\t${err.message}`))
-        })
+      mkdirp(dir).then(resolve, (err) => {
+        reject(new Error(`Failed to create path '${dir}' for configuration file '${fullPath}':\n\t${err.message}`))
+      })
     } else {
       resolve()
     }

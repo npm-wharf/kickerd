@@ -236,47 +236,21 @@ describe('Kicker', function () {
       before(function () {
         log.reset()
         delete kicker.configuration.changeWait
-        writerMock.restore()
-        processHostMock.restore()
-        writerMock = sinon.mock(writer)
-        processHostMock = sinon.mock(processHost)
-        processHostMock
-          .expects('restart')
-          .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
-          .callsArg(1)
-          .resolves({})
-        writerMock
-          .expects('hasFiles')
-          .withArgs(kicker.configuration)
-          .returns(true)
-        writerMock
-          .expects('writeFiles')
-          .withArgs(kicker.configuration)
-          .resolves(true)
-        kicker.timeout = setTimeout(() => {
-          log.info('We waited a long time for this!')
-        }, 1000000)
       })
 
-      it('should use the default timeout', function (done) {
-        const mochaTestTimeoutForThisTest = 1000
-        this.timeout(mochaTestTimeoutForThisTest)
-
-        setTimeout(done, mochaTestTimeoutForThisTest - 100)
-        kicker.wait({ node: { key: 'nada' } })
-          .then(() => {
-            log.entries.should.eql([
-              'Change detected - waiting for 10 seconds before applying change'
-            ])
-            processHostMock.verify()
-            writerMock.verify()
-          })
+      it('should use the default timeout', function () {
+        const promise = kicker.wait({ node: { key: 'nada' } })
+        // Because the timeout is set to 10 seconds
+        // we must bypass this and resolve manually
+        kicker.deferredChange.resolve()
+        log.entries.should.eql([
+          'Change detected - waiting for 10 seconds before applying change'
+        ])
+        return promise
       })
 
       after(function () {
         kicker.configuration.changeWait = 0.1
-        processHostMock.restore()
-        writerMock.restore()
       })
     })
 

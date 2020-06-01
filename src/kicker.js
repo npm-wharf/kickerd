@@ -116,8 +116,7 @@ class Kicker {
       return Promise.resolve({})
     }
     if (this.timeout) {
-      clearTimeout(this.timeout)
-      delete this.timeout
+      this.removeTimeout()
     }
     const timeout = this.configuration.changeWait || CHANGE_TIMEOUT
     this.log.info(`Change detected - waiting for ${timeout} seconds before applying change`)
@@ -128,12 +127,12 @@ class Kicker {
     this.deferredChange = { resolve: null, reject: null, promise: null }
     this.deferredChange.promise = new Promise((resolve, reject) => {
       this.deferredChange.resolve = () => {
-        delete this.timeout
+        this.removeTimeout()
         delete this.deferredChange
         resolve()
       }
       this.deferredChange.reject = (e) => {
-        delete this.timeout
+        this.removeTimeout()
         delete this.deferredChange
         reject(e)
       }
@@ -160,6 +159,11 @@ class Kicker {
       return this.writer.writeFiles(this.configuration)
     }
     return Promise.resolve()
+  }
+
+  removeTimeout () {
+    clearTimeout(this.timeout)
+    delete this.timeout
   }
 }
 

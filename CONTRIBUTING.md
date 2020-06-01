@@ -58,7 +58,7 @@ All interactions in the kickerd repository are covered by the [npm Code of Condu
 
 Running the following commands should successfully run the tests:
 
-```
+```shell-script
 # Install node packages
 $ npm install
 # grab the docker file

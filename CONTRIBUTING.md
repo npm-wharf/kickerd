@@ -49,7 +49,7 @@ All interactions in the kickerd repository are covered by the [npm Code of Condu
 ├── kick.sh                # bash script to run kickerd command using env variables
 ├── kill-etcd.sh           # bash script to kill etcd if it's got in a bad state
 ├── LICENSE                # No Open Source project is complete without a License!
-├── package.json           # The projects main manifest file 📃
+├── package.json           # The project's main manifest file 📃
 ├── README.md              # Read me :-)
 └── start-etcd.sh          # bash script to start the etcd service
 ```

@@ -85,7 +85,7 @@ $ ./start-etcd.sh
 
 If the HTTP server process gets in to a weird state (`process-host` tests will fail) you may need to manually kill the HTTP process:
 
-```
+```shell-script
 $ ps
   PID TTY           TIME CMD
  1424 ttys001    0:00.08 -zsh

@@ -124,9 +124,9 @@ Snazzy, we're always up for fancy new things! If the feature is fairly minor [cr
 
 ## Development Dependencies
 
-You'll need a few things installed in order to update and test the {{project-name}} during development:
+You'll need a few things installed in order to update and test kickerd during development:
 
-* [node](https://nodejs.org/) v8 or greater (v12 recommended)
+* [node](https://nodejs.org/) v12
 
 > We recommend that you have a [node version manager](https://github.com/nvm-sh/nvm) installed if you plan on fixing bugs that might be present in a specific version of node. With a version manager you can easily switch versions of node and test if your changes to the CLI project are working.
 

@@ -1,4 +1,3 @@
-const assert = require('assert')
 const Promise = require('bluebird')
 const Etcd = require('node-etcd')
 const Lock = require('etcd-lock')
@@ -27,8 +26,10 @@ function applyChange (config, change) {
       if (level >= definition.level) {
         if (change.action === 'set') {
           definition.setValue(value, level)
-        } else {
-          assert(change.action === 'delete')
+          // We ignore the branch here - there's no likely way that we'll
+          // get here without action == 'delete' but to be safe we'll leave
+          // the logic how it is.
+        } else /* istanbul ignore else|if */ if (change.action === 'delete') {
           definition.clearValue(level)
         }
         changed = true

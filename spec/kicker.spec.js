@@ -232,13 +232,13 @@ describe('Kicker', function () {
       })
     })
 
-    describe('when timeout is not set', function () {
+    describe('when changeWait is not set', function () {
       before(function () {
         log.reset()
         delete kicker.configuration.changeWait
       })
 
-      it('should use the default timeout', function () {
+      it('should use the default changeWait', function () {
         const promise = kicker.wait({ node: { key: 'nada' } })
         // Because the timeout is set to 10 seconds
         // we must bypass this and resolve manually

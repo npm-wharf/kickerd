@@ -73,7 +73,7 @@ $ npm test
 
 If the docker instance gets in to a weird state (`etcd` tests will fail) you may need to reset the docker vm:
 
-```
+```shell-script
 # Running ./start-etcd.sh will fail because a docker image is already running:
 $ ./start-etcd.sh
 docker: Error response from daemon: Conflict. The container name "/kickerd-etcd" is already in use by container "6beeb116c20102e26307fb26731c25c32b5bcec2eddd5f82e0c52065fd4700e9". You have to remove (or rename) that container to be able to reuse that name.

@@ -49,7 +49,7 @@ All interactions in the kickerd repository are covered by the [npm Code of Condu
 ├── kick.sh                # bash script to run kickerd command using env variables
 ├── kill-etcd.sh           # bash script to kill etcd if it's got in a bad state
 ├── LICENSE                # No Open Source project is complete without a License!
-├── package.json           # The projects main manifest file 📃
+├── package.json           # The project's main manifest file 📃
 ├── README.md              # Read me :-)
 └── start-etcd.sh          # bash script to start the etcd service
 ```
@@ -58,7 +58,7 @@ All interactions in the kickerd repository are covered by the [npm Code of Condu
 
 Running the following commands should successfully run the tests:
 
-```
+```shell-script
 # Install node packages
 $ npm install
 # grab the docker file
@@ -73,7 +73,7 @@ $ npm test
 
 If the docker instance gets in to a weird state (`etcd` tests will fail) you may need to reset the docker vm:
 
-```
+```shell-script
 # Running ./start-etcd.sh will fail because a docker image is already running:
 $ ./start-etcd.sh
 docker: Error response from daemon: Conflict. The container name "/kickerd-etcd" is already in use by container "6beeb116c20102e26307fb26731c25c32b5bcec2eddd5f82e0c52065fd4700e9". You have to remove (or rename) that container to be able to reuse that name.
@@ -85,7 +85,7 @@ $ ./start-etcd.sh
 
 If the HTTP server process gets in to a weird state (`process-host` tests will fail) you may need to manually kill the HTTP process:
 
-```
+```shell-script
 $ ps
   PID TTY           TIME CMD
  1424 ttys001    0:00.08 -zsh

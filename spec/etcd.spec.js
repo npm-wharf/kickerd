@@ -326,7 +326,7 @@ describe('Etcd', function () {
           () => {
             return l1.unlock()
           }
-        ).then(() => done())
+        ).then(done)
       })
     })
 

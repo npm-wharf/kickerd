@@ -1,6 +1,88 @@
-# Change Log
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [2.0.0](https://github.com/npm-wharf/kickerd/compare/v1.4.3...v2.0.0) (2020-06-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* updated all the dependencies to be able to use node v12
+
+* chore: update dependencies and fix resultant errors - breaking change for node 12 support
+
+* fix: build fails on node 6, removing node 6 support on this version
+
+* Progress on getting tests to 100% - having local test issues so checking ci
+
+* Full code coverage for etcd.js
+
+* Add tests for kicker - needs a refactor. Argued with sinon.
+
+* Add tests to get writer.js to 100% coverage
+
+* Removed accidentally included hardcoded path
+
+* 100% test coverage minus 1.5 lines - refactor pending
+
+* Add a contributing file (needs fleshing out) and stubs fs.writeFile
+
+* Resetting a code change I didn't mean to commit
+
+* Just pass the resolve function
+
+* A few changes from going over the code
+
+* Rervert accidental typo
+
+* Deleted old Dockerfile.demo file and updates CONTRIBUTING.md
+
+* No more dotfiles, moved to assets directory to make it tidy
+
+* Remove ./ from path to package.json
+
+* Update CONTRIBUTING.md
+
+Syntax highlighting in CONTRIBUTING.md
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+* Fixing gramatical error on CONTRIBUTING.md
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+* Update CONTRIBUTING.md
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+* Update CONTRIBUTING.md
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+* Update spec/etcd.spec.js to pass `done` directly
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+* Update node version and missing project name in CONTRIBUTING.md
+
+* Fix issues with default timeout config test
+
+* Fixes test failing due to mocha done weirdness
+
+* Changes wording for testing default changeWait
+
+* Reinstate logic branch and add coverage ignore comment
+
+Co-authored-by: Lukas Spieß <lumaxis@github.com>
+
+### Features
+
+* add support for node 12 ([#5](https://github.com/npm-wharf/kickerd/issues/5)) ([e9312a8](https://github.com/npm-wharf/kickerd/commit/e9312a8b037a2895d46a362ad3c6d70cf75ddb28))
+
+
+### Bug Fixes
+
+* prevent overwriting files with empty etcd keys ([bf91e47](https://github.com/npm-wharf/kickerd/commit/bf91e47775be771bad65b99a17d725006532ab25))
 
 <a name="1.4.4"></a>
 ## [1.4.4](https://github.com/npm-wharf/kickerd/compare/v1.4.3...v1.4.4) (2018-04-25)

@@ -13,15 +13,24 @@ function applyChange (config, change) {
   let changed = false
   const [key, name, group] = getKey(config.prefix, change.node.key)
   const value = change.node.value
-  const level = group ? 4 : (name ? 3 : 2)
+  let level = 2
+  if (group) {
+    level = 4
+  } else if (name) {
+    level = 3
+  }
+
   config.sets.forEach(definition => {
     if (definition.key === key) {
       match = true
       if (level >= definition.level) {
         if (change.action === 'set') {
           definition.setValue(value, level)
-        } else if (change.action === 'delete') {
-          definition.clearValue(value, level)
+          // We ignore the branch here - there's no likely way that we'll
+          // get here without action == 'delete' but to be safe we'll leave
+          // the logic how it is.
+        } else /* istanbul ignore else|if */ if (change.action === 'delete') {
+          definition.clearValue(level)
         }
         changed = true
       }
@@ -53,13 +62,15 @@ function applyKeys (config, keys) {
 }
 
 function fetchConfig (client, config) {
-  const get = Promise.promisify(client.get, {context: client})
-  return get(config.prefix, {recursive: true})
+  const get = Promise.promisify(client.get, { context: client })
+  return get(config.prefix, { recursive: true })
     .catch({ errorCode: 100 }, () => {
       // 'Key not found' error.
-      return {node: {
-        nodes: []
-      }}
+      return {
+        node: {
+          nodes: []
+        }
+      }
     })
     .then((response) => {
       return response.node.nodes.reduce((acc, node) => {
@@ -108,7 +119,7 @@ function toEnvKey (key) {
 }
 
 function watch (client, config, onChange) {
-  const watcher = client.watcher(config.prefix, null, {recursive: true})
+  const watcher = client.watcher(config.prefix, null, { recursive: true })
   log.info(`Watching for changes in keyspace ${config.prefix}`)
   watcher.on('change', (change) => {
     if (applyChange(config, change) === false) {
@@ -125,6 +136,7 @@ module.exports = function (options = { url: DEFAULT_URL }) {
   return {
     fetchConfig: fetchConfig.bind(null, client),
     lockRestart: lockRestart.bind(null, client),
-    watch: watch.bind(null, client)
+    watch: watch.bind(null, client),
+    clientUrl: options.url
   }
 }

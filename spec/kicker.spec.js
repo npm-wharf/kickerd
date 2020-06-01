@@ -1,6 +1,7 @@
 require('./setup')
 
 const Kicker = require('../src/kicker')
+const should = require('chai').should()
 
 const bootStrap = {
   generate: () => {},
@@ -24,6 +25,7 @@ class Log {
   constructor () {
     this.entries = []
   }
+
   reset () { this.entries = [] }
   debug (x) { this.entries.push(x) }
   info (x) { this.entries.push(x) }
@@ -193,7 +195,9 @@ describe('Kicker', function () {
       before(function () {
         log.reset()
         writerMock.restore()
+        processHostMock.restore()
         writerMock = sinon.mock(writer)
+        processHostMock = sinon.mock(processHost)
         processHostMock
           .expects('restart')
           .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
@@ -201,11 +205,11 @@ describe('Kicker', function () {
           .resolves({})
         writerMock
           .expects('hasFiles')
-          .withArgs(configuration)
+          .withArgs(kicker.configuration)
           .returns(true)
         writerMock
           .expects('writeFiles')
-          .withArgs(configuration)
+          .withArgs(kicker.configuration)
           .resolves(true)
       })
 
@@ -221,9 +225,36 @@ describe('Kicker', function () {
             writerMock.verify()
           })
       })
+
+      after(function () {
+        processHostMock.restore()
+        writerMock.restore()
+      })
     })
 
-    describe('when a change occurs - lock acquisition fails', function () {
+    describe('when changeWait is not set', function () {
+      before(function () {
+        log.reset()
+        delete kicker.configuration.changeWait
+      })
+
+      it('should use the default changeWait', function () {
+        const promise = kicker.wait({ node: { key: 'nada' } })
+        // Because the timeout is set to 10 seconds
+        // we must bypass this and resolve manually
+        kicker.deferredChange.resolve()
+        log.entries.should.eql([
+          'Change detected - waiting for 10 seconds before applying change'
+        ])
+        return promise
+      })
+
+      after(function () {
+        kicker.configuration.changeWait = 0.1
+      })
+    })
+
+    describe('when a change occurs and lock acquisition fails when retry is disabled', function () {
       let lockMock
       before(function () {
         kicker.configuration.lockRestart = true
@@ -242,7 +273,7 @@ describe('Kicker', function () {
           .never()
       })
 
-      it('should restart process immediately', function () {
+      it('should not restart the process', function () {
         return kicker.wait({ node: { key: 'nada' } })
           .then(
             null,
@@ -251,7 +282,7 @@ describe('Kicker', function () {
                 'Change detected - waiting for 0.1 seconds before applying change',
                 'Configuration change detected on key \'nada\'',
                 'Acquiring restart lock',
-                'Failed to acquire lock, trying again in 5 seconds : no lock for you'
+                'Failed to acquire lock, dontRetry is set to \'true\', not retrying : no lock for you'
               ])
               lockMock.verify()
               etcdMock.verify()
@@ -266,6 +297,107 @@ describe('Kicker', function () {
         etcdMock.restore()
         writerMock.restore()
         delete kicker.configuration.lockRestart
+      })
+    })
+
+    // NOTE: If the lock fails consistently and lockRestart = true
+    // retry loops recursively for ever.
+    describe('when a change occurs and lock acquisition fails when retry is enabled', function () {
+      let lockStub
+      before(function () {
+        kicker.configuration.lockRestart = true
+        kicker.configuration.dontRetry = false
+        kicker.configuration.lockTTL = 0.1
+        log.reset()
+        processHostMock = sinon.mock(processHost)
+        lockStub = sinon.stub(lock, 'lock')
+        lockStub
+          .onFirstCall()
+          .rejects(new Error('no lock for you'))
+          .onSecondCall()
+          .resolves({})
+        etcdMock = sinon.mock(etcd)
+        etcdMock
+          .expects('lockRestart')
+          .withArgs(kicker.configuration)
+          .twice()
+          .returns(lock)
+        processHostMock
+          .expects('restart')
+          .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
+          .callsArg(1)
+          .resolves({})
+      })
+
+      it('should retry and then restart the process', function () {
+        return kicker.wait({ node: { key: 'nada' } })
+          .then(
+            null,
+            () => {
+              log.entries.should.eql([
+                'Change detected - waiting for 0.1 seconds before applying change',
+                'Configuration change detected on key \'nada\'',
+                'Acquiring restart lock',
+                'Failed to acquire lock, trying again in 5 seconds : no lock for you'
+              ])
+              etcdMock.verify()
+              processHostMock.verify()
+            }
+          )
+      })
+
+      after(function () {
+        processHostMock.restore()
+        lockStub.restore()
+        etcdMock.restore()
+        writerMock.restore()
+        delete kicker.configuration.lockRestart
+        delete kicker.configuration.lockTTL
+      })
+    })
+
+    describe('when a timeout exists', function () {
+      before(function () {
+        log.reset()
+        writerMock.restore()
+        processHostMock.restore()
+        writerMock = sinon.mock(writer)
+        processHostMock = sinon.mock(processHost)
+        processHostMock
+          .expects('restart')
+          .withArgs(kicker.configuration, kicker.writeFiles, kicker.onExit)
+          .callsArg(1)
+          .resolves({})
+        writerMock
+          .expects('hasFiles')
+          .withArgs(kicker.configuration)
+          .returns(true)
+        writerMock
+          .expects('writeFiles')
+          .withArgs(kicker.configuration)
+          .resolves(true)
+        kicker.timeout = setTimeout(() => {
+          log.info('We waited a long time for this!')
+        }, 1000000)
+      })
+
+      it('should remove the timeout', function () {
+        return kicker.wait({ node: { key: 'nada' } })
+          .then(() => {
+            log.entries.should.eql([
+              'Change detected - waiting for 0.1 seconds before applying change',
+              'Configuration change detected on key \'nada\'',
+              'writing configuration files to disk'
+            ])
+            processHostMock.verify()
+            writerMock.verify()
+            should.equal(kicker.timeout, undefined)
+          })
+      })
+
+      after(function () {
+        processHostMock.restore()
+        writerMock.restore()
       })
     })
 

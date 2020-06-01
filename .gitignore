@@ -2,3 +2,6 @@ coverage/
 node_modules/
 .nyc_output/
 package-lock.json
+app.cfg
+.DS_STORE
+report*.json

@@ -25,16 +25,17 @@ describe('Process Host', function () {
   let exited = false
   let wroteFiles = false
   const TIMEOUT = process.env.TRAVIS ? 4000 : 1000
-  before(function (done) {
-    this.timeout(10000)
+
+  function startProcess (done) {
     output = new EchoStream()
     configuration = {
       cwd: './example/app',
       start: 'node index.js',
       sets: [
         { env: 'TITLE', value: 'http' },
-        { env: 'PORT', value: 8018 },
+        { env: 'PORT', value: 8018, type: 'number' },
         { env: 'MOTD', value: 'this is a test of sorts' },
+        { env: 'UINDEFINED' },
         { env: 'GREETING_ROUTE', value: '/custom-greeting', argument: 'greeting-route' },
         { env: 'GREETING_MESSAGE', value: 'hey, look, it\'s a message', argument: 'greeting-message' }
       ]
@@ -43,6 +44,11 @@ describe('Process Host', function () {
     processHost.start(configuration, () => { exited = true })
     configuration.process.stdout.pipe(output)
     setTimeout(() => done(), TIMEOUT)
+  }
+
+  before(function (done) {
+    this.timeout(10000)
+    startProcess(done)
   })
 
   it('should not exit unexpectedly', function () {
@@ -62,7 +68,7 @@ describe('Process Host', function () {
       path: '/custom-greeting',
       port: 8018
     }, (res) => {
-      let raw = []
+      const raw = []
       res.on('data', chunk => {
         raw.push(chunk.toString())
       })
@@ -85,9 +91,9 @@ describe('Process Host', function () {
       },
       () => { exited = true }
     )
-    .then(() => {
-      setTimeout(() => done(), TIMEOUT)
-    })
+      .then(() => {
+        setTimeout(() => done(), TIMEOUT)
+      })
   })
 
   it('should have written files during restart', function () {
@@ -98,7 +104,7 @@ describe('Process Host', function () {
     http.request({
       port: 8018
     }, (res) => {
-      let raw = []
+      const raw = []
       res.on('data', chunk => {
         raw.push(chunk.toString())
       })
@@ -121,6 +127,40 @@ describe('Process Host', function () {
 
   it('should stop on command', function () {
     return processHost.stop(configuration)
+  })
+
+  // Starting the processHost each time is costly
+  // we may be able to speed this up by mocking out more here.
+  describe('failure cases', function () {
+    beforeEach(function (done) {
+      this.timeout(10000)
+      startProcess(done)
+    })
+
+    it('should run onExit() if the child process exits outside stop command', function () {
+      delete configuration.waiting
+      configuration.process.emit('close')
+      exited.should.eql(true)
+    })
+
+    it('should run onError() if the child process raises an error', function () {
+      sinon.stub(process, 'exit')
+      configuration.process.emit('error', new Error('Oh no!'))
+      sinon.assert.calledWith(process.exit, 100)
+    })
+
+    it('should return waiting promise if already set', function () {
+      const output = processHost.stop({
+        process: 'fake',
+        waiting: { promise: 'should be returned' }
+      })
+      output.should.be.eql('should be returned')
+    })
+
+    afterEach(function () {
+      sinon.restore()
+      processHost.stop(configuration)
+    })
   })
 
   after(function () {

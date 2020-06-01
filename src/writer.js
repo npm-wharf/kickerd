@@ -14,12 +14,8 @@ function hasFiles (configuration) {
 function ensurePath (dir, fullPath) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(dir)) {
-      mkdirp(dir, (err) => {
-        if (err) {
-          reject(new Error(`Failed to create path '${dir}' for configuration file '${fullPath}':\n\t${err.message}`))
-        } else {
-          resolve()
-        }
+      mkdirp(dir).then(resolve, (err) => {
+        reject(new Error(`Failed to create path '${dir}' for configuration file '${fullPath}':\n\t${err.message}`))
       })
     } else {
       resolve()
@@ -27,6 +23,7 @@ function ensurePath (dir, fullPath) {
   })
 }
 
+// TODO: Make this async :-)
 function writeFile (definition) {
   return new Promise((resolve, reject) => {
     const fullPath = path.resolve(definition.file)
@@ -45,6 +42,10 @@ function writeFile (definition) {
           } else {
             resolve()
           }
+        }
+      ).catch(
+        (err) => {
+          reject(err)
         }
       )
   })

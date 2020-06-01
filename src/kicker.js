@@ -29,9 +29,9 @@ class Kicker {
         this.writeFiles,
         this.onExit
       )
-      .then(() => {
-        this.deferredChange.resolve()
-      })
+        .then(() => {
+          this.deferredChange.resolve()
+        })
     }
   }
 
@@ -92,20 +92,21 @@ class Kicker {
       this.writeFiles,
       this.onExit
     )
-    .then(
-      () => {
-        this.deferredChange.resolve()
-        lock.unlock()
-      }
-    )
+      .then(
+        () => {
+          this.deferredChange.resolve()
+          lock.unlock()
+        }
+      )
   }
 
   onLockFailed (change, err) {
     const retry = this.configuration.lockTTL || RETRY_TIMEOUT
-    this.log.error(`Failed to acquire lock, trying again in ${retry} seconds : ${err.message}`)
     if (this.configuration.dontRetry !== true) {
+      this.log.error(`Failed to acquire lock, trying again in ${retry} seconds : ${err.message}`)
       setTimeout(() => this.configurationChanged(change), retry * 1000)
     } else {
+      this.log.error(`Failed to acquire lock, dontRetry is set to 'true', not retrying : ${err.message}`)
       this.deferredChange.reject(err)
     }
   }
@@ -115,8 +116,7 @@ class Kicker {
       return Promise.resolve({})
     }
     if (this.timeout) {
-      clearTimeout(this.timeout)
-      delete this.timeout
+      this.removeTimeout()
     }
     const timeout = this.configuration.changeWait || CHANGE_TIMEOUT
     this.log.info(`Change detected - waiting for ${timeout} seconds before applying change`)
@@ -127,12 +127,12 @@ class Kicker {
     this.deferredChange = { resolve: null, reject: null, promise: null }
     this.deferredChange.promise = new Promise((resolve, reject) => {
       this.deferredChange.resolve = () => {
-        delete this.timeout
+        this.removeTimeout()
         delete this.deferredChange
         resolve()
       }
       this.deferredChange.reject = (e) => {
-        delete this.timeout
+        this.removeTimeout()
         delete this.deferredChange
         reject(e)
       }
@@ -159,6 +159,11 @@ class Kicker {
       return this.writer.writeFiles(this.configuration)
     }
     return Promise.resolve()
+  }
+
+  removeTimeout () {
+    clearTimeout(this.timeout)
+    delete this.timeout
   }
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "kickerd",
+  "name": "@npm-wharf/kickerd",
   "version": "2.0.0",
   "description": "source configuration from various inputs and kick the service when they change",
   "main": "./src/index.js",
